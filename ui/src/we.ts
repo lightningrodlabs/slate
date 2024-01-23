@@ -28,7 +28,6 @@ export const appletServices: AppletServices = {
           const dnaHash = await getMyDna(ROLE_NAME, appletClient)
           return {
             hrl: [dnaHash, board.hash],
-            context: {},
           };
         },
       },
