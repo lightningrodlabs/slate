@@ -89,7 +89,7 @@
     if (getSceneVersion($state.excalidrawElements) !== getSceneVersion(excalidrawElements)) {
       activeBoard.requestChanges([{type: 'set-excalidraw', excalidrawElements, excalidrawState: appState}])
     }
-  }, 3000)
+  }, 3000, { 'leading': true })
 
 </script>
 <div class="board" >
