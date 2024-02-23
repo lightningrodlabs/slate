@@ -1,9 +1,11 @@
+import { cloneDeep, pickBy } from "lodash";
 import type { DocumentStore, SessionStore, WorkspaceStore, SynStore } from "@holochain-syn/core";
 import { get, type Readable } from "svelte/store";
 import { v1 as uuidv1 } from "uuid";
 import { type AgentPubKey, type EntryHash, type EntryHashB64, encodeHashToBase64, type AgentPubKeyB64, type Timestamp } from "@holochain/client";
 import { BoardType } from "./boardList";
 import type { HrlB64WithContext } from "@lightningrodlabs/we-applet";
+import type { AppState, ExcalidrawElement } from "@excalidraw/excalidraw/types";
 
 export type BoardProps = {
   bgUrl: string,
@@ -13,77 +15,79 @@ export type BoardProps = {
 export type BoardEphemeralState = { [key: string]: string };
 
 export interface BoardState {
-  count: number;
   name: string;
   props: BoardProps;
   boundTo: Array<HrlB64WithContext>
+  excalidrawElements: ExcalidrawElement[];
+  excalidrawState: AppState;
 }
-  
-  export type BoardDelta =
-    | {
-        type: "set-name";
-        name: string;
-      }
-    | {
-        type: "set-state";
-        state: BoardState;
-      }
-    | {
-        type: "set-props";
-        props: BoardProps;
-      }
-    | {
-        type: "increment";
-      };
 
+export type BoardDelta =
+  | {
+      type: "set-name";
+      name: string;
+    }
+  | {
+      type: "set-state";
+      state: BoardState;
+    }
+  | {
+      type: "set-props";
+      props: BoardProps;
+    }
+  | {
+      type: "set-excalidraw";
+      excalidrawElements: ExcalidrawElement[];
+      excalidrawState: AppState;
+    };
 
-  export const boardGrammar = {
-    initialState(init: Partial<BoardState>|undefined = undefined)  {
-      const state: BoardState = {
-        name: "untitled",
-        count: 0,
-        props: {bgUrl:"", attachments:[]},
-        boundTo: [],
-      }
-      if (init) {
-        Object.assign(state, init);
-      }
-      return state
-    },
-    applyDelta( 
-      delta: BoardDelta,
-      state: BoardState,
-      _ephemeralState: any,
-      _author: AgentPubKey
-    ) {
-      switch (delta.type) {
-        case "set-state":
-          if (delta.state.name !== undefined) state.name = delta.state.name
-          if (delta.state.props !== undefined) state.props = delta.state.props
-          if (delta.state.boundTo !== undefined) state.boundTo = delta.state.boundTo
-          if (delta.state.count !== undefined) {
-            state.count = delta.state.count
-          }
-          break;
-        case "set-name":
-          state.name = delta.name
-          break;
-        case "set-props":
-          state.props = delta.props
-          break;
+export const boardGrammar = {
+  initialState(init: Partial<BoardState>|undefined = undefined)  {
+    const state: BoardState = {
+      name: "untitled",
+      props: {bgUrl:"", attachments:[]},
+      boundTo: [],
+      excalidrawElements: [],
+      excalidrawState: {}
+    }
+    if (init) {
+      Object.assign(state, init);
+    }
+    return state
+  },
+  applyDelta(
+    delta: BoardDelta,
+    state: BoardState,
+    _ephemeralState: any,
+    _author: AgentPubKey
+  ) {
+    switch (delta.type) {
+      case "set-state":
+        if (delta.state.name !== undefined) state.name = delta.state.name
+        if (delta.state.props !== undefined) state.props = delta.state.props
+        if (delta.state.boundTo !== undefined) state.boundTo = delta.state.boundTo
+        break;
+      case "set-name":
+        state.name = delta.name
+        break;
+      case "set-props":
+        state.props = delta.props
+        break;
+      case "set-excalidraw":
+        // For some reason customData is set to undefined which breaks in syn code getValueDescription
+        const excalidrawElements = delta.excalidrawElements.map(e => pickBy(e, (v, k) => typeof(v) !== "undefined"))
+        state.excalidrawElements = cloneDeep(excalidrawElements)
+        //state.excalidrawState = delta.excalidrawState
+        break;
+    }
+  },
+};
 
-        case "increment":
-          state.count = state.count+1
-          break;
-      }
-    },
-  };
-  
 export type BoardStateData = {
   hash: EntryHash,
   state: BoardState,
 }
-  
+
 export class Board {
   public session: SessionStore<BoardState,BoardEphemeralState> | undefined
   public hashB64: EntryHashB64
@@ -94,7 +98,7 @@ export class Board {
 
   public static async Create(synStore: SynStore, init: Partial<BoardState>|undefined = undefined) {
     const initState = boardGrammar.initialState(init)
-  
+
     const documentStore = await synStore.createDocument(initState,{})
 
     await synStore.client.tagDocument(documentStore.documentHash, BoardType.active)
@@ -127,11 +131,11 @@ export class Board {
   }
 
   async join() {
-    if (! this.session) 
+    if (! this.session)
       this.session = await this.workspace.joinSession()
     console.log("JOINED", this.session)
   }
-  
+
   async leave() {
     if (this.session) {
       this.session.leaveSession()

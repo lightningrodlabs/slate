@@ -1,12 +1,13 @@
 <script lang="ts">
-  import { getContext, onMount } from "svelte";
+  import { getContext, afterUpdate, onMount } from "svelte";
+  import { encodeHashToBase64 } from "@holochain/client";
   import type { GriffyStore } from "./store";
   import { v1 as uuidv1 } from "uuid";
   import type {  Board, BoardProps } from "./board";
   import EditBoardDialog from "./EditBoardDialog.svelte";
   import Avatar from "./Avatar.svelte";
   import { decodeHashFromBase64, type Timestamp } from "@holochain/client";
-  import { cloneDeep, isEqual } from "lodash";
+  import { cloneDeep, throttle } from "lodash";
   import '@shoelace-style/shoelace/dist/components/dropdown/dropdown.js';
   import '@shoelace-style/shoelace/dist/components/textarea/textarea.js';
   import ClickEdit from "./ClickEdit.svelte";
@@ -15,10 +16,9 @@
   import { exportBoard } from "./export";
   import AttachmentsList from './AttachmentsList.svelte';
   import AttachmentsDialog from "./AttachmentsDialog.svelte"
-
-  onMount(async () => {
-	});
-
+  import { Excalidraw, getSceneVersion } from "@excalidraw/excalidraw";
+  import ReactAdapter from "./ReactAdapter.svelte";
+  import AboutDialog from "./AboutDialog.svelte";
 
   const { getStore } :any = getContext("store");
   let store: GriffyStore = getStore();
@@ -30,8 +30,32 @@
   $: participants = activeBoard.participants()
   $: activeHashB64 = store.boardList.activeBoardHashB64;
   $: state = activeBoard.readableState()
- 
 
+  let excalidrawAPI = null
+
+  $: if ($state) {
+    if (excalidrawAPI) {
+      // TODO: maybe check scene version to see if its changed? getSceneVersion($state.excalidrawElements)
+      excalidrawAPI.updateScene({
+        elements: $state.excalidrawElements,
+        //appState: $state.excalidrawState
+      })
+    }
+  }
+
+  onMount(async () => {
+    console.log('mounted', excalidrawAPI, $state)
+
+	});
+
+  const setExcalidrawAPI = (api) => {
+    excalidrawAPI = api
+  }
+
+  // afterUpdate(() => {
+  //   // TODO: why is this being called so much?
+	// 	console.log(' afterUpdate', $state.excalidrawElements, getSceneVersion($state.excalidrawElements));
+	// });
 
   const closeBoard = async () => {
     await store.closeActiveBoard(false);
@@ -45,7 +69,6 @@
 
   const close = ()=> {
   }
-
 
   const doFocus = (node) => {
     // otherwise we get an error from the shoelace element
@@ -62,6 +85,10 @@
     activeBoard.requestChanges([{type: 'set-props', props : newProps }])
   }
 
+  const updateExcalidrawState = throttle((excalidrawElements, appState, files) => {
+    activeBoard.requestChanges([{type: 'set-excalidraw', excalidrawElements, excalidrawState: appState}])
+  }, 5000)
+
 </script>
 <div class="board" >
 
@@ -71,7 +98,7 @@
       style={$state.props.bgUrl ? `background-size:cover; background-image: url(${encodeURI($state.props.bgUrl)})`: ""}></div>
   </div>
 
-    <EditBoardDialog bind:this={editBoardDialog}></EditBoardDialog>
+  <EditBoardDialog bind:this={editBoardDialog}></EditBoardDialog>
   <div class="top-bar">
     <div class="left-items">
       {#if standAlone}
@@ -108,7 +135,7 @@
             </div>
           {/if}
           <div style="margin-left:10px; margin-top:2px;display:flex">
-            <button class="attachment-button" style="margin-right:10px" on:click={()=>attachmentsDialog.open(undefined)} >          
+            <button class="attachment-button" style="margin-right:10px" on:click={()=>attachmentsDialog.open(undefined)} >
               <SvgIcon icon="link" size="16px"/>
             </button>
             {#if $state.props.attachments}
@@ -117,7 +144,7 @@
             {/if}
           </div>
         {/if}
-  
+
       {/if}
     </div>
     <div class="right-items">
@@ -138,19 +165,16 @@
 
     </div>
   </div>
-  {#if $state}
-    <div style="
-    background-color: blue;
-    color: red;
-    margin-top: 20px;
-    font-size: 20px">Count:{$state.count}</div>
-    <sl-button style="width:100px; margin-left:10px"
-      on:click={
-        activeBoard.requestChanges([{type:"increment"}])
-      }
-    >
-      INC STATE
-    </sl-button>
+  {#if $state && $state.excalidrawState}
+    <div class='excalidraw-wrapper'>
+      <ReactAdapter
+        el={Excalidraw}
+        class="excalidraw"
+        excalidrawAPI={setExcalidrawAPI}
+        initialData={{elements: $state.excalidrawElements, appState: {}}}
+        onChange={updateExcalidrawState}
+      />
+    </div>
   {/if}
   <div class="bottom-fade"></div>
 </div>
@@ -239,7 +263,7 @@
   .right-items .board-button::part(base) {
     font-size: 24px;
   }
-  
+
   .board-button {
     margin-left: 10px;
   }
@@ -283,7 +307,7 @@
     padding: 0;
     margin: 0;
   }
-  
+
   .board-button {
     width: 30px;
     height: 30px;
@@ -298,7 +322,7 @@
     justify-content: center;
     transition: all .25s ease;
   }
-  
+
   .board-button:hover {
     transform: scale(1.25);
   }
@@ -316,7 +340,6 @@
     padding-left: 8px;
   }
 
-
   .bottom-fade {
     position: fixed;
     bottom: 0;
@@ -327,7 +350,6 @@
     background: linear-gradient(180deg, rgba(189, 209, 230, 0) 0%, rgba(102, 138, 174, 0.81) 100%);
     opacity: 0.4;
   }
- 
 
   .board::-webkit-scrollbar {
     height: 10px;
@@ -340,6 +362,16 @@
     /* background: linear-gradient(180deg, rgba(20, 60, 119, 0) 0%, rgba(20,60,119,.6) 100%); */
   }
 
+  .excalidraw-wrapper {
+    width: 100%;
+    height: 100%;
+    position: relative;
+  }
+
+  .excalidraw {
+    width: 100%;
+    height: 100%;
+  }
 
   :global(.attachment-button) {
     width: 30px;
@@ -347,7 +379,7 @@
     padding: 4px;
     border-radius: 50%;
     border: 1px solid rgba(235, 235, 238, 1.0);
-    background-color: rgba(255,255,255,.8);    
+    background-color: rgba(255,255,255,.8);
   }
   :global(.attachment-button:hover) {
     transform: scale(1.25);

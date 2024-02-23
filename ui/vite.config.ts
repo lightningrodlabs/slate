@@ -15,5 +15,9 @@ export default defineConfig({
         usePolling: true
     }
   },
+  define: {
+    "process.env.IS_PREACT": JSON.stringify("false"),
+    "process.env.NODE_ENV": JSON.stringify("development")
+  }
 });
 
