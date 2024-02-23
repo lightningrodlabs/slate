@@ -35,9 +35,10 @@
 
   $: if ($state) {
     if (excalidrawAPI) {
-      // TODO: maybe check scene version to see if its changed? getSceneVersion($state.excalidrawElements)
+      // XXX: Need to do a cloneDeep here too otherwise resizing elements doesn't trigger
+      //      updateExcalidrawState because it must be editing the $state.excalidrawElements directly and so the scene # is updated internally
       excalidrawAPI.updateScene({
-        elements: $state.excalidrawElements,
+        elements: cloneDeep($state.excalidrawElements),
         //appState: $state.excalidrawState
       })
     }
@@ -45,7 +46,6 @@
 
   onMount(async () => {
     console.log('mounted', excalidrawAPI, $state)
-
 	});
 
   const setExcalidrawAPI = (api) => {
@@ -86,8 +86,10 @@
   }
 
   const updateExcalidrawState = throttle((excalidrawElements, appState, files) => {
-    activeBoard.requestChanges([{type: 'set-excalidraw', excalidrawElements, excalidrawState: appState}])
-  }, 5000)
+    if (getSceneVersion($state.excalidrawElements) !== getSceneVersion(excalidrawElements)) {
+      activeBoard.requestChanges([{type: 'set-excalidraw', excalidrawElements, excalidrawState: appState}])
+    }
+  }, 3000)
 
 </script>
 <div class="board" >

@@ -75,8 +75,8 @@ export const boardGrammar = {
         break;
       case "set-excalidraw":
         // For some reason customData is set to undefined which breaks in syn code getValueDescription
-        const excalidrawElements = delta.excalidrawElements.map(e => pickBy(e, (v, k) => typeof(v) !== "undefined"))
-        state.excalidrawElements = cloneDeep(excalidrawElements)
+        const newExcalidrawElements = cloneDeep(delta.excalidrawElements).map(e => pickBy(e, (v, k) => typeof(v) !== "undefined"))
+        state.excalidrawElements = newExcalidrawElements
         //state.excalidrawState = delta.excalidrawState
         break;
     }
