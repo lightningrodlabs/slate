@@ -141,7 +141,7 @@
     <div class="loading"><div class="loader"></div></div>
   {:else if $prof.status=="complete" && $prof.value == undefined}
     <div class="create-profile">
-      <div class="welcome-text"><div style="width:200px"><LogoIcon /></div></div>
+      <div ><LogoIcon /></div>
       <create-profile
         on:profile-created={()=>{}}
       ></create-profile>

@@ -292,8 +292,7 @@
     }
 
     .logo {
-        height: 16px;
-        margin-right: 5px;
+        width: 20px;
     }
 
     .board-bg {

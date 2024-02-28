@@ -58,7 +58,7 @@
         "description": "Let's draw!",
         "icon": {
           "type": "filesystem",
-          "path": "./we_dev/griffy_icon.png"
+          "path": "./we_dev/griffy_icon.svg"
         },
         "source": {
           "type": "localhost",
