@@ -44,9 +44,9 @@
     class:wide={wide} >
 
     <GroupParticipants/>
-        <h3 class="type-header">Boards</h3>
+        <h3 class="type-header">Canvases</h3>
         <div class="boards-section">
-            <div class="new-board" on:click={()=>newBoardDialog.open()} title="New Board"><SvgIcon color="white" size=25px icon=faSquarePlus style="margin-left: 15px;"/><span>New Board</span></div>
+            <div class="new-board" on:click={()=>newBoardDialog.open()} title="New Canvas"><SvgIcon color="white" size=25px icon=faSquarePlus style="margin-left: 15px;"/><span>New Canvas</span></div>
             {#if $activeBoards.status == "complete" && $activeBoards.value.length > 0}
                 {#each $activeBoards.value as hash}
                     <div

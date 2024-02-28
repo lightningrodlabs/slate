@@ -82,28 +82,28 @@
         </p>
     <p class="small">Copyright © 2023,2024 Holochain Foundation &amp; Lightning Rod Labs.  This software is distributed under the MIT License</p>
     {#if importing}
-        <div class="export-import" title="Import Boards">
+        <div class="export-import" title="Import Canvases">
             <div class="spinning" style="margin:auto"><SvgIcon icon=faSpinner color="#fff"></SvgIcon></div>
         </div>
     {:else}
         <div class="export-import" on:click={()=>{fileinput.click();}} title="Import Boards">
-            <SvgIcon color="#fff" icon=faFileImport size=20px style="margin-left: 15px;"/><span>Import Boards </span>
+            <SvgIcon color="#fff" icon=faFileImport size=20px style="margin-left: 15px;"/><span>Import Canvases </span>
         </div>
     {/if}
     {#if exporting}
-        <div class="export-import" title="Import Boards">
+        <div class="export-import" title="Import Canvases">
             <div class="spinning" style="margin:auto"><SvgIcon icon=faSpinner  color="#fff"></SvgIcon></div>
         </div>
     {:else}
-        <div class="export-import" on:click={()=>{exportAllBoards()}} title="Export All Boards"><SvgIcon color="#fff" icon=faFileExport size=20px style="margin-left: 15px;"/><span>Export All Boards</span></div>
+        <div class="export-import" on:click={()=>{exportAllBoards()}} title="Export All Canvases"><SvgIcon color="#fff" icon=faFileExport size=20px style="margin-left: 15px;"/><span>Export All Boards</span></div>
     {/if}
 
 
     {#if $allBoards.status == "pending"}
-        <div class="spinning" ><SvgIcon icon=faSpinner  color="#fff"></SvgIcon></div>
+        <div class="spinning" style="display:inline-block"> <SvgIcon icon=faSpinner  color="black"></SvgIcon></div>
     {:else if $allBoards.status == "complete"}
         <sl-dropdown skidding=15>
-            <sl-button slot="trigger" caret><SvgIcon icon=faClone size=20px style="margin-right: 10px"/><span>New Board From </span></sl-button>
+            <sl-button slot="trigger" caret><SvgIcon icon=faClone size=20px style="margin-right: 10px"/><span>Clone Canvas From </span></sl-button>
             <sl-menu>
                 {#each Array.from($allBoards.value.entries()) as [key,board]}
                     <sl-menu-item on:click={()=>{

@@ -57,7 +57,7 @@
     }
     let boardEditor
 </script>
-<sl-dialog persistent bind:this={dialog} label="Edit Board" 
+<sl-dialog persistent bind:this={dialog} label="Edit Canvas" 
 on:sl-initial-focus={(e)=>{
     boardEditor.initialFocus()
     e.preventDefault()

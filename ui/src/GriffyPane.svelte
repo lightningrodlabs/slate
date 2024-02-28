@@ -124,7 +124,7 @@
               <SvgIcon icon="faArchive" style="background: transparent; opacity: .5; position: relative; top: -2px;" size="14px" /> <span>Archive</span>
             </sl-menu-item>
             <sl-menu-item  on:click={leaveBoard} class="leave-board" >
-                <SvgIcon icon="faArrowTurnDown" style="background: transparent; opacity: .5; position: relative; top: -2px;" size="12px" /> <span>Leave board</span>
+                <SvgIcon icon="faArrowTurnDown" style="background: transparent; opacity: .5; position: relative; top: -2px;" size="12px" /> <span>Leave Canvas</span>
             </sl-menu-item>
           </sl-menu>
         </sl-dropdown>
@@ -386,5 +386,10 @@
   :global(.attachment-button:hover) {
     transform: scale(1.25);
   }
+
+  .idle {
+    opacity: 0.5;
+  }
+
 
 </style>

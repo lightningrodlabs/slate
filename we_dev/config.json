@@ -54,11 +54,11 @@
     "applets": [
       {
         "name": "Griffy Hot Reload",
-        "subtitle": "Real-time stickies boards",
-        "description": "Let's do it!",
+        "subtitle": "Real-time drawing!",
+        "description": "Let's draw!",
         "icon": {
           "type": "filesystem",
-          "path": "./we_dev/griffy_icon.svg"
+          "path": "./we_dev/griffy_icon.png"
         },
         "source": {
           "type": "localhost",
@@ -89,7 +89,7 @@
         },
         "source": {
           "type": "https",
-          "url": "https://github.com/lightningrodlabs/notebooks/releases/download/v0.0.14/notebooks.webhapp"
+          "url": "https://github.com/lightningrodlabs/notebooks/releases/download/v0.2.0/notebooks.webhapp"
         }
       }
     ]
