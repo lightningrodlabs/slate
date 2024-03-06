@@ -2,6 +2,7 @@ import { HoloHashMap, LazyHoloHashMap } from "@holochain-open-dev/utils";
 import { derived, get, writable, type Readable, type Writable } from "svelte/store";
 import { type AgentPubKey, type EntryHash, type EntryHashB64, encodeHashToBase64 } from "@holochain/client";
 import {toPromise, type AsyncReadable, pipe, joinAsync, asyncDerived, sliceAndJoin, alwaysSubscribed} from '@holochain-open-dev/stores'
+import { FileStorageClient } from "@holochain-open-dev/file-storage";
 import { SynStore, WorkspaceStore } from "@holochain-syn/core";
 import type { ProfilesStore } from "@holochain-open-dev/profiles";
 import { cloneDeep } from "lodash";
@@ -36,12 +37,13 @@ export class BoardList {
 
     boardData2 = new LazyHoloHashMap( documentHash => {
         const docStore = this.synStore.documents.get(documentHash)
+        const fileStorageClient = new FileStorageClient(this.synStore.client.client, 'griffy');
 
         const board = pipe(docStore.allWorkspaces,
-            workspaces => 
-                new Board(docStore,  new WorkspaceStore(docStore, Array.from(workspaces.keys())[0]))
+            workspaces =>
+                new Board(docStore,  new WorkspaceStore(docStore, Array.from(workspaces.keys())[0]), fileStorageClient)
         )
-        const latestState = pipe(board, 
+        const latestState = pipe(board,
             board => board.workspace.latestSnapshot
             )
         const tip = pipe(board,
@@ -74,7 +76,7 @@ export class BoardList {
             },
         )
     )
-        
+
     allAgentBoards: AsyncReadable<ReadonlyMap<AgentPubKey, Array<BoardAndLatestState>>>
     allAuthorAgents: AsyncReadable<AgentPubKey[]>
 
@@ -85,7 +87,7 @@ export class BoardList {
                 return sliceAndJoin(this.agentBoardHashes, agents, {errors: "filter_out"})
             }
         )
-   
+
         const boardHashes = asyncDerived(this.synStore.documentsByTag.get(BoardType.active),x=>Array.from(x.keys()))
         this.activeBoardHashes = boardHashes
         const archivedHashes = asyncDerived(this.synStore.documentsByTag.get(BoardType.archived),x=>Array.from(x.keys()))
@@ -106,13 +108,13 @@ export class BoardList {
         // const archivedTypedHashes = asyncDerived(archivedHashes, hashes=>hashes.map(hash=>{const h:TypedHash = {hash,type:BoardType.archived}; return h}))
 
         // const joinedTyped = joinAsync([activeTypedHashes, archivedTypedHashes])
-        // this.typedHashes = asyncDerived(joinedTyped, 
+        // this.typedHashes = asyncDerived(joinedTyped,
         //     ([active,archived]) => [...active, ...archived]
         //     )
 
         const joined = joinAsync([boardHashes, archivedHashes])
 
-        const asyncJoined = asyncDerived(joined, 
+        const asyncJoined = asyncDerived(joined,
             ([boards,archived]) => [...boards, ...archived]
             )
         this.allBoards = pipe(asyncJoined,
@@ -122,7 +124,7 @@ export class BoardList {
             ([boards,archived]) => boards.length + archived.length
         )
     }
-    
+
     async getBoard(documentHash: EntryHash) : Promise<Board | undefined> {
         if (!documentHash) return undefined
         const board = await toPromise(this.boardData2.get(documentHash))

@@ -12,6 +12,8 @@ integrity:
       bundled: ../../../target/wasm32-unknown-unknown/release/syn_integrity.wasm
     - name: profiles_integrity
       bundled: ../../../target/wasm32-unknown-unknown/release/profiles_integrity.wasm
+    - name: file_storage_integrity
+      bundled: ../../../target/wasm32-unknown-unknown/release/file_storage_integrity.wasm
 
 coordinator:
   zomes:
@@ -23,3 +25,7 @@ coordinator:
       bundled: ../../../target/wasm32-unknown-unknown/release/profiles.wasm
       dependencies:
         - name: profiles_integrity
+    - name: file_storage
+      bundled: ../../../target/wasm32-unknown-unknown/release/file_storage.wasm
+      dependencies:
+        - name: file_storage_integrity

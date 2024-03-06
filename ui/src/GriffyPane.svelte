@@ -39,8 +39,17 @@
       //      updateExcalidrawState because it must be editing the $state.excalidrawElements directly and so the scene # is updated internally
       excalidrawAPI.updateScene({
         elements: cloneDeep($state.excalidrawElements),
-        //appState: $state.excalidrawState
+        // appState: $state.excalidrawAppState
       })
+      if ($state.excalidrawFileHashes) {
+        const currentFiles = excalidrawAPI.getFiles()
+        console.log("files state", $state.excalidrawFileHashes, ", current =", currentFiles)
+        const currentExcalidrawFileIds = Object.keys(currentFiles)
+        const stateFileIds = Object.keys($state.excalidrawFileHashes)
+        const newFileIds = stateFileIds.filter((id) => !currentExcalidrawFileIds.includes(id))
+        console.log("updating files from state, new files = ", newFileIds)
+        // excalidrawAPI.addFiles($state.excalidrawFiles)
+      }
     }
   }
 
@@ -85,9 +94,10 @@
     activeBoard.requestChanges([{type: 'set-props', props : newProps }])
   }
 
-  const updateExcalidrawState = throttle((excalidrawElements, appState, files) => {
+  const updateExcalidrawState = throttle((excalidrawElements, excalidrawAppState, excalidrawFiles) => {
     if (getSceneVersion($state.excalidrawElements) !== getSceneVersion(excalidrawElements)) {
-      activeBoard.requestChanges([{type: 'set-excalidraw', excalidrawElements, excalidrawState: appState}])
+      activeBoard.requestChanges([{ type: 'set-excalidraw', excalidrawElements, excalidrawAppState }])
+      activeBoard.updateFiles(excalidrawFiles)
     }
   }, 3000, { 'leading': true })
 
@@ -167,13 +177,13 @@
 
     </div>
   </div>
-  {#if $state && $state.excalidrawState}
+  {#if $state && $state.excalidrawElements}
     <div class='excalidraw-wrapper'>
       <ReactAdapter
         el={Excalidraw}
         class="excalidraw"
         excalidrawAPI={setExcalidrawAPI}
-        initialData={{elements: $state.excalidrawElements, appState: {}}}
+        initialData={{ elements: $state.excalidrawElements, appState: {} }}
         onChange={updateExcalidrawState}
       />
     </div>

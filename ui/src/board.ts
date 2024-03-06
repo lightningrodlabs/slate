@@ -1,11 +1,13 @@
 import { cloneDeep, pickBy } from "lodash";
 import type { DocumentStore, SessionStore, WorkspaceStore, SynStore } from "@holochain-syn/core";
+import { FileStorageClient } from "@holochain-open-dev/file-storage";
 import { get, type Readable } from "svelte/store";
 import { v1 as uuidv1 } from "uuid";
 import { type AgentPubKey, type EntryHash, type EntryHashB64, encodeHashToBase64, type AgentPubKeyB64, type Timestamp } from "@holochain/client";
 import { BoardType } from "./boardList";
 import type { HrlB64WithContext } from "@lightningrodlabs/we-applet";
-import type { AppState, ExcalidrawElement } from "@excalidraw/excalidraw/types";
+import type { AppState, ExcalidrawElement, BinaryFiles } from "@excalidraw/excalidraw/types";
+import { dataURItoBlob } from "./util";
 
 export type BoardProps = {
   bgUrl: string,
@@ -19,7 +21,8 @@ export interface BoardState {
   props: BoardProps;
   boundTo: Array<HrlB64WithContext>
   excalidrawElements: ExcalidrawElement[];
-  excalidrawState: AppState;
+  excalidrawAppState: AppState;
+  excalidrawFileHashes: { [id: string]: EntryHash[] };
 }
 
 export type BoardDelta =
@@ -38,8 +41,12 @@ export type BoardDelta =
   | {
       type: "set-excalidraw";
       excalidrawElements: ExcalidrawElement[];
-      excalidrawState: AppState;
-    };
+      excalidrawAppState: AppState;
+    }
+  | {
+      type: "set-excalidraw-files";
+      fileHashes: { [id: string]: EntryHash[] };
+    };;
 
 export const boardGrammar = {
   initialState(init: Partial<BoardState>|undefined = undefined)  {
@@ -48,13 +55,15 @@ export const boardGrammar = {
       props: {bgUrl:"", attachments:[]},
       boundTo: [],
       excalidrawElements: [],
-      excalidrawState: {}
+      excalidrawAppState: {},
+      excalidrawFileHashes: {}
     }
     if (init) {
       Object.assign(state, init);
     }
     return state
   },
+
   applyDelta(
     delta: BoardDelta,
     state: BoardState,
@@ -74,10 +83,14 @@ export const boardGrammar = {
         state.props = delta.props
         break;
       case "set-excalidraw":
-        // For some reason customData is set to undefined which breaks in syn code getValueDescription
+        // For some reason the customData key is set to undefined which breaks in syn code getValueDescription
         const newExcalidrawElements = cloneDeep(delta.excalidrawElements).map(e => pickBy(e, (v, k) => typeof(v) !== "undefined"))
         state.excalidrawElements = newExcalidrawElements
-        //state.excalidrawState = delta.excalidrawState
+        // state.excalidrawAppState = delta.excalidrawAppState
+        break;
+      case "set-excalidraw-files":
+        console.log("set-excalidraw-files = ", delta.fileHashes)
+        state.excalidrawFileHashes = delta.fileHashes
         break;
     }
   },
@@ -92,8 +105,13 @@ export class Board {
   public session: SessionStore<BoardState,BoardEphemeralState> | undefined
   public hashB64: EntryHashB64
 
-  constructor(public document: DocumentStore<BoardState, BoardEphemeralState>, public workspace: WorkspaceStore<BoardState,BoardEphemeralState>) {
+  constructor(
+    public document: DocumentStore<BoardState, BoardEphemeralState>,
+    public workspace: WorkspaceStore<BoardState,BoardEphemeralState>,
+    public fileStorageClient: FileStorageClient
+  ) {
     this.hashB64 = encodeHashToBase64(this.document.documentHash)
+    this.fileStorageClient = fileStorageClient
   }
 
   public static async Create(synStore: SynStore, init: Partial<BoardState>|undefined = undefined) {
@@ -104,22 +122,23 @@ export class Board {
     await synStore.client.tagDocument(documentStore.documentHash, BoardType.active)
 
     const workspaceStore = await documentStore.createWorkspace(
-        `${new Date}`,
-        undefined
-       );
+      `${new Date}`,
+      undefined
+      );
 
-    const me = new Board(documentStore, workspaceStore);
+    const fileStorageClient = new FileStorageClient(synStore.client.client, 'griffy');
+
+    const me = new Board(documentStore, workspaceStore, fileStorageClient);
     await me.join()
 
     if (initState !== undefined) {
       let changes : BoardDelta[] = [{
-          type: "set-state",
-          state: initState
-          },
-      ]
+        type: "set-state",
+        state: initState
+      }]
       if (changes.length > 0) {
-          me.requestChanges(changes)
-          await me.session.commitChanges()
+        me.requestChanges(changes)
+        await me.session.commitChanges()
       }
     }
 
@@ -131,8 +150,7 @@ export class Board {
   }
 
   async join() {
-    if (! this.session)
-      this.session = await this.workspace.joinSession()
+    if (!this.session) this.session = await this.workspace.joinSession()
     console.log("JOINED", this.session)
   }
 
@@ -145,11 +163,11 @@ export class Board {
   }
 
   state(): BoardState | undefined {
-      if (!this.session) {
-        return undefined
-      } else {
-        return get(this.session.state)
-      }
+    if (!this.session) {
+      return undefined
+    } else {
+      return get(this.session.state)
+    }
   }
 
   readableState(): Readable<BoardState> | undefined {
@@ -161,12 +179,30 @@ export class Board {
   }
 
   requestChanges(deltas: Array<BoardDelta>) {
-      console.log("REQUESTING BOARD CHANGES: ", deltas)
-      this.session.change((state,_eph)=>{
-        for (const delta of deltas) {
-          boardGrammar.applyDelta(delta, state,_eph, undefined)
-        }
-      })
+    console.log("REQUESTING BOARD CHANGES: ", deltas)
+    this.session.change((state,_eph)=>{
+      for (const delta of deltas) {
+        boardGrammar.applyDelta(delta, state, _eph, undefined)
+      }
+    })
+  }
+
+  async updateFiles(files: BinaryFiles) {
+    console.log("updatefiles = ", files, this.fileStorageClient)
+    const fileHashes = {}
+    for (const fileId in files) {
+      const fileData = files[fileId]
+      const file = new File([dataURItoBlob(fileData.dataURL)], fileData.id, {
+        lastModified: fileData.created,
+        type: fileData.mimeType
+      });
+      const hash = await this.fileStorageClient.uploadFile(file)
+      fileHashes[fileData.id] = hash
+    }
+    console.log("fileHashes = ", fileHashes)
+    this.session.change((state, _eph) => {
+      boardGrammar.applyDelta({ type: 'set-excalidraw-files', fileHashes }, state, _eph, undefined)
+    })
   }
 
   sessionParticipants() {
@@ -180,8 +216,9 @@ export class Board {
       return this.session._participants
     }
   }
+
   async commitChanges() {
-      this.session.commitChanges()
+    this.session.commitChanges()
   }
 
 }
