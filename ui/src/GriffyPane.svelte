@@ -1,8 +1,8 @@
 <script lang="ts">
   import { getContext, afterUpdate, onMount } from "svelte";
-  import { encodeHashToBase64 } from "@holochain/client";
   import type { GriffyStore } from "./store";
   import { v1 as uuidv1 } from "uuid";
+  import { fromUint8Array } from "js-base64";
   import type {  Board, BoardProps } from "./board";
   import EditBoardDialog from "./EditBoardDialog.svelte";
   import Avatar from "./Avatar.svelte";
@@ -43,12 +43,19 @@
       })
       if ($state.excalidrawFileHashes) {
         const currentFiles = excalidrawAPI.getFiles()
-        console.log("files state", $state.excalidrawFileHashes, ", current =", currentFiles)
-        const currentExcalidrawFileIds = Object.keys(currentFiles)
+        const currentExcalidrawFileIds = Object.keys(currentFiles) // ids from excalidraw => hash from file storage
         const stateFileIds = Object.keys($state.excalidrawFileHashes)
         const newFileIds = stateFileIds.filter((id) => !currentExcalidrawFileIds.includes(id))
-        console.log("updating files from state, new files = ", newFileIds)
-        // excalidrawAPI.addFiles($state.excalidrawFiles)
+        for (const id of newFileIds) {
+          const hash = decodeHashFromBase64($state.excalidrawFileHashes[id])
+          activeBoard.fileStorageClient.downloadFile(hash).then((file) => {
+            file.arrayBuffer().then(data => {
+              const dataArray = new Uint8Array(data)
+              const dataURL = `data:${file.type};base64,${fromUint8Array(dataArray)}`
+              excalidrawAPI.addFiles([{ id, dataURL, mimeType: file.type, created: file.lastModified }])
+            })
+          })
+        }
       }
     }
   }

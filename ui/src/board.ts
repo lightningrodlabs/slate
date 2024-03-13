@@ -22,7 +22,7 @@ export interface BoardState {
   boundTo: Array<HrlB64WithContext>
   excalidrawElements: ExcalidrawElement[];
   excalidrawAppState: AppState;
-  excalidrawFileHashes: { [id: string]: EntryHash[] };
+  excalidrawFileHashes: { [id: string]: EntryHashB64 };
 }
 
 export type BoardDelta =
@@ -45,7 +45,7 @@ export type BoardDelta =
     }
   | {
       type: "set-excalidraw-files";
-      fileHashes: { [id: string]: EntryHash[] };
+      fileHashes: { [id: string]: EntryHashB64 };
     };;
 
 export const boardGrammar = {
@@ -188,7 +188,6 @@ export class Board {
   }
 
   async updateFiles(files: BinaryFiles) {
-    console.log("updatefiles = ", files, this.fileStorageClient)
     const fileHashes = {}
     for (const fileId in files) {
       const fileData = files[fileId]
@@ -197,7 +196,7 @@ export class Board {
         type: fileData.mimeType
       });
       const hash = await this.fileStorageClient.uploadFile(file)
-      fileHashes[fileData.id] = hash
+      fileHashes[fileData.id] = encodeHashToBase64(hash)
     }
     console.log("fileHashes = ", fileHashes)
     this.session.change((state, _eph) => {
