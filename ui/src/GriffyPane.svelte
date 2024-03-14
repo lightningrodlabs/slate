@@ -48,13 +48,7 @@
         const newFileIds = stateFileIds.filter((id) => !currentExcalidrawFileIds.includes(id))
         for (const id of newFileIds) {
           const hash = decodeHashFromBase64($state.excalidrawFileHashes[id])
-          activeBoard.fileStorageClient.downloadFile(hash).then((file) => {
-            file.arrayBuffer().then(data => {
-              const dataArray = new Uint8Array(data)
-              const dataURL = `data:${file.type};base64,${fromUint8Array(dataArray)}`
-              excalidrawAPI.addFiles([{ id, dataURL, mimeType: file.type, created: file.lastModified }])
-            })
-          })
+          tryToDownloadFile(id, hash)
         }
       }
     }
@@ -66,6 +60,23 @@
 
   const setExcalidrawAPI = (api) => {
     excalidrawAPI = api
+  }
+
+  const tryToDownloadFile = async (id, fileHash, tries = 1) => {
+    try {
+      const file = await activeBoard.fileStorageClient.downloadFile(fileHash)
+      file.arrayBuffer().then(data => {
+        const dataArray = new Uint8Array(data)
+        const dataURL = `data:${file.type};base64,${fromUint8Array(dataArray)}`
+        excalidrawAPI.addFiles([{ id, dataURL, mimeType: file.type, created: file.lastModified }])
+      })
+    } catch (e) {
+      if (tries < 5) {
+        setTimeout(() => tryToDownloadFile(id, fileHash, tries + 1), 500)
+      } else {
+        console.log("Failed to downloading file", e)
+      }
+    }
   }
 
   // afterUpdate(() => {
