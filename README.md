@@ -1,4 +1,4 @@
-# Griffy!
+# Slate!
 
 Holochain hApp for collaborative diagramming.
 
