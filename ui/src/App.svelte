@@ -13,8 +13,8 @@
   import LogoIcon from "./icons/LogoIcon.svelte";
   import { appletServices } from './we';
 
-  const appId = import.meta.env.VITE_APP_ID ? import.meta.env.VITE_APP_ID : 'griffy'
-  const roleName = 'griffy'
+  const appId = import.meta.env.VITE_APP_ID ? import.meta.env.VITE_APP_ID : 'slate'
+  const roleName = 'slate'
   const appPort = import.meta.env.VITE_APP_PORT ? import.meta.env.VITE_APP_PORT : 8888
   const adminPort = import.meta.env.VITE_ADMIN_PORT
   const url = `ws://localhost:${appPort}`;
@@ -79,7 +79,7 @@
               break;
             case "attachable":
               switch (weClient.renderInfo.view.roleName) {
-                case "griffy":
+                case "slate":
                   switch (weClient.renderInfo.view.integrityZomeName) {
                     case "syn_integrity":
                       switch (weClient.renderInfo.view.entryType) {
@@ -119,7 +119,7 @@
           throw new Error("Unknown render view type");
 
       }
-      
+
       //@ts-ignore
       client = weClient.renderInfo.appletClient;
       //@ts-ignore

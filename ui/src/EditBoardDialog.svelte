@@ -1,6 +1,6 @@
 <script lang="ts">
     import BoardEditor from './BoardEditor.svelte';
-    import type { GriffyStore } from './store';
+    import type { SlateStore } from './store';
     import { getContext, onMount } from 'svelte';
     import { isEqual } from 'lodash'
     import { encodeHashToBase64, type EntryHash, type EntryHashB64 } from '@holochain/client';
@@ -24,7 +24,7 @@
 
     const { getStore } :any = getContext('store');
 
-    const store:GriffyStore = getStore();
+    const store:SlateStore = getStore();
 
     const updateBoard = async ( name: string, props: BoardProps) => {
         const boardHashB64 = encodeHashToBase64(boardHash)
@@ -57,7 +57,7 @@
     }
     let boardEditor
 </script>
-<sl-dialog persistent bind:this={dialog} label="Edit Canvas" 
+<sl-dialog persistent bind:this={dialog} label="Edit Canvas"
 on:sl-initial-focus={(e)=>{
     boardEditor.initialFocus()
     e.preventDefault()
@@ -66,7 +66,7 @@ on:sl-initial-focus={(e)=>{
 
 on:sl-request-close={(event)=>{
     if (event.detail.source === 'overlay') {
-    event.preventDefault();    
+    event.preventDefault();
 }}}>
     <BoardEditor bind:this={boardEditor} handleSave={updateBoard} cancelEdit={close}/>
 </sl-dialog>

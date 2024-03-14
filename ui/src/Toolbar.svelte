@@ -3,11 +3,11 @@
   import type { ProfilesStore } from "@holochain-open-dev/profiles";
   import Search from './Search.svelte';
   import { getContext } from "svelte";
-  import type { GriffyStore } from "./store";
+  import type { SlateStore } from "./store";
   import SvgIcon from "./SvgIcon.svelte";
 
   const { getStore } :any = getContext("store");
-  let store: GriffyStore = getStore();
+  let store: SlateStore = getStore();
 
   $: uiProps = store.uiProps
   $: activeHash = store.boardList.activeBoardHash;
@@ -29,7 +29,7 @@
   <div class="items"><Search></Search></div>
   <div class="items">
     <Folk></Folk>
-    <a href="https://github.com/holochain-apps/griffy/issues" title="Report a problem in our GitHub repo" target="_blank">
+    <a href="https://github.com/lightningrodlabs/slate/issues" title="Report a problem in our GitHub repo" target="_blank">
       <div class="nav-button"><SvgIcon color="#fff" icon="faBug" size=20px /></div>
     </a>
   </div>
@@ -65,7 +65,7 @@
     width: 30px;
     height: 30px;
   }
-  
+
   .open {
     margin-left: 10px;
   }
@@ -75,5 +75,5 @@
     flex: 0 0 auto;
     align-items: center;
   }
-  
+
 </style>

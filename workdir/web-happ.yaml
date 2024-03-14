@@ -1,7 +1,7 @@
 ---
 manifest_version: "1"
-name: griffy
+name: slate
 ui:
   bundled: "../ui/dist.zip"
 happ_manifest:
-  bundled: "./griffy.happ"
+  bundled: "./slate.happ"

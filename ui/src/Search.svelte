@@ -12,14 +12,14 @@
     import type { v1 as uuidv1 } from "uuid";
     import { toPromise } from "@holochain-open-dev/stores";
     import type { BoardState, BoardStateData } from "./board";
-    import type { GriffyStore } from "./store";
+    import type { SlateStore } from "./store";
 
 
     let foundBoards: Array<BoardStateData> = []
     $: foundBoards
 
     const { getStore } :any = getContext('store');
-    const store:GriffyStore = getStore();
+    const store:SlateStore = getStore();
     $: activeHashB64 = store.boardList.activeBoardHashB64;
 
     const selectBoard = (hash: EntryHash) => {
@@ -36,7 +36,7 @@
             for (const [hash, asyncBoardData] of Array.from(all.entries()) ) {
                 const state = asyncBoardData.latestState
 
-                if (state.name.toLocaleLowerCase().includes(searchText) 
+                if (state.name.toLocaleLowerCase().includes(searchText)
                     ) fb.push({hash,state:state})
             }
         }
@@ -68,7 +68,7 @@
     {#if showSearchResults && (foundBoards.length>0 )}
     <sl-menu class="search-results"
     >
-        
+
         {#if foundBoards.length>0}
             <sl-menu-label>Boards</sl-menu-label>
             {#each foundBoards as found}
@@ -81,7 +81,7 @@
                     }}
                 >
                 <div style="margin-left:10px;">
-                    {found.state.name} 
+                    {found.state.name}
                 </div>
                 </sl-menu-item>
             {/each}

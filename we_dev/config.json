@@ -31,8 +31,8 @@
         ],
         "applets": [
           {
-            "name": "Griffy Hot Reload",
-            "instanceName": "Griffy Hot Reload",
+            "name": "Slate Hot Reload",
+            "instanceName": "Slate Hot Reload",
             "registeringAgent": 1,
             "joiningAgents": [2]
           },
@@ -53,16 +53,16 @@
     ],
     "applets": [
       {
-        "name": "Griffy Hot Reload",
+        "name": "Slate Hot Reload",
         "subtitle": "Real-time drawing!",
         "description": "Let's draw!",
         "icon": {
           "type": "filesystem",
-          "path": "./we_dev/griffy_icon.svg"
+          "path": "./we_dev/icon.svg"
         },
         "source": {
           "type": "localhost",
-          "happPath": "./workdir/griffy.happ",
+          "happPath": "./workdir/slate.happ",
           "uiPort": 8888
         }
       },

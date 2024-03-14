@@ -13,20 +13,20 @@ hdi = "0.3"
 hdk = "0.2"
 serde = "1"
 
-[workspace.dependencies.griffy]
-path = "dnas/griffy/zomes/coordinator/griffy"
+[workspace.dependencies.slate]
+path = "dnas/slate/zomes/coordinator/slate"
 
-[workspace.dependencies.griffy_integrity]
-path = "dnas/griffy/zomes/integrity/griffy"
+[workspace.dependencies.slate_integrity]
+path = "dnas/slate/zomes/integrity/slate"
 
 [workspace.dependencies.profiles]
-path = "dnas/griffy/zomes/coordinator/profiles"
+path = "dnas/slate/zomes/coordinator/profiles"
 
 [workspace.dependencies.profiles_integrity]
-path = "dnas/griffy/zomes/integrity/profiles"
+path = "dnas/slate/zomes/integrity/profiles"
 
 [workspace.dependencies.file_storage]
-path = "dnas/griffy/zomes/coordinator/file_storage"
+path = "dnas/slate/zomes/coordinator/file_storage"
 
 [workspace.dependencies.file_storage_integrity]
-path = "dnas/griffy/zomes/integrity/file_storage"
+path = "dnas/slate/zomes/integrity/file_storage"

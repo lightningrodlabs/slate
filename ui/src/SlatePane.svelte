@@ -1,6 +1,6 @@
 <script lang="ts">
   import { getContext, afterUpdate, onMount } from "svelte";
-  import type { GriffyStore } from "./store";
+  import type { SlateStore } from "./store";
   import { v1 as uuidv1 } from "uuid";
   import { fromUint8Array } from "js-base64";
   import type {  Board, BoardProps } from "./board";
@@ -21,7 +21,7 @@
   import AboutDialog from "./AboutDialog.svelte";
 
   const { getStore } :any = getContext("store");
-  let store: GriffyStore = getStore();
+  let store: SlateStore = getStore();
 
   export let activeBoard: Board
   export let standAlone = false

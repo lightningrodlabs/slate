@@ -1,7 +1,7 @@
 <script lang="ts">
   import "@shoelace-style/shoelace/dist/components/skeleton/skeleton.js";
   import { createEventDispatcher, getContext } from "svelte";
-  import type { GriffyStore } from "./store";
+  import type { SlateStore } from "./store";
   import { hrlB64WithContextToRaw } from "./util";
   import type { HrlB64WithContext } from "@lightningrodlabs/we-applet";
   import SvgIcon from "./SvgIcon.svelte";
@@ -12,12 +12,12 @@
   export let allowDelete = true
 
   const { getStore } :any = getContext("store");
-  let store: GriffyStore = getStore();
-  
+  let store: SlateStore = getStore();
+
 </script>
 <div class="attachments-list">
   {#each attachments as attachment, index}
-    <div 
+    <div
       class:attachment-item-with-delete={allowDelete}
       class:attachment-item={!allowDelete}
     >
@@ -32,7 +32,7 @@
             }}
           style="display:flex;flex-direction:row;margin-right:5px"><sl-icon src={attachableInfo.icon_src} slot="prefix"></sl-icon>
           {attachableInfo.name}
-        </sl-button> 
+        </sl-button>
         {#if allowDelete}
           <sl-button size="small"
             on:click={()=>{
@@ -57,8 +57,8 @@
   .attachment-item {
   }
   .attachment-item-with-delete {
-    border:1px solid #aaa; 
-    background-color:rgba(0,255,0,.1); 
+    border:1px solid #aaa;
+    background-color:rgba(0,255,0,.1);
     padding:4px;
     display:flex;
     margin-right:4px;

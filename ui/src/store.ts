@@ -28,7 +28,7 @@ TimeAgo.addDefaultLocale(en)
 
 const ZOME_NAME = 'syn'
 
-export class GriffyService {
+export class SlateService {
   constructor(public client: AppAgentClient, public roleName, public zomeName = ZOME_NAME) {}
 
   private callZome(fnName: string, payload: any) {
@@ -52,10 +52,10 @@ export interface UIProps {
   latestComment: {[key: string]: Timestamp}
 }
 
-export class GriffyStore {
+export class SlateStore {
   myAgentPubKeyB64: AgentPubKeyB64
   timeAgo = new TimeAgo('en-US')
-  service: GriffyService;
+  service: SlateService;
   boardList: BoardList;
   updating = false
   synStore: SynStore;
@@ -77,7 +77,7 @@ export class GriffyStore {
     })
 
     this.myAgentPubKeyB64 = encodeHashToBase64(this.client.myPubKey);
-    this.service = new GriffyService(
+    this.service = new SlateService(
       this.client,
       this.roleName,
       this.zomeName

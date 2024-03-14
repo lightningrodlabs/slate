@@ -2,22 +2,22 @@
     import "@shoelace-style/shoelace/dist/components/skeleton/skeleton.js";
     import '@shoelace-style/shoelace/dist/components/dialog/dialog.js';
     import { getContext } from "svelte";
-    import type { GriffyStore } from "./store";
+    import type { SlateStore } from "./store";
     import Avatar from './Avatar.svelte';
     import "@holochain-open-dev/stores/dist/debug-store.js"
     import type { AgentPubKey } from "@holochain/client";
-  
+
     const { getStore } :any = getContext('store');
-    const store:GriffyStore = getStore();
-  
+    const store:SlateStore = getStore();
+
     //$: agents = store.profilesStore.agentsWithProfile
     $: agents = store.boardList.allAuthorAgents
     $: agentBoards = store.boardList.allAgentBoards
     $: agentBoardHashes = store.boardList.agentBoardHashes
-    
+
     //__debugStore(store.boardList.allAgentBoards)
     //.status=="complete" ? sliceAndJoin( store.boardList.boardParticipants, $agents.value): undefined
-  
+
     export const close=()=>{dialog.hide()}
     export const open=()=>{
       dialog.show()
@@ -64,7 +64,7 @@
             {/if}
         </div>
     </div>
-  
+
   <style>
     .participants {
         position: relative;
@@ -73,7 +73,7 @@
     .participants:hover {
         z-index: 100;
     }
-        
+
       .boards {
           display: flex;
           flex-direction: row;
@@ -155,4 +155,3 @@
         opacity: 1;
       }
   </style>
-  

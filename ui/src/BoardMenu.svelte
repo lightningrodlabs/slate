@@ -1,6 +1,6 @@
 <script lang="ts">
     import { getContext } from "svelte";
-    import type { GriffyStore } from "./store";
+    import type { SlateStore } from "./store";
     import type {  EntryHash } from '@holochain/client';
     import GroupParticipants from './GroupParticipants.svelte';
     import NewBoardDialog from './NewBoardDialog.svelte';
@@ -15,7 +15,7 @@
 
     const { getStore } :any = getContext('store');
 
-    const store:GriffyStore = getStore();
+    const store:SlateStore = getStore();
 
     $: activeBoards = store.boardList.activeBoardHashes
     $: archivedBoards = store.boardList.archivedBoardHashes
@@ -101,10 +101,10 @@
     {/if}
 
     <NewBoardDialog bind:this={newBoardDialog}></NewBoardDialog>
-    <div class="footer" 
+    <div class="footer"
         class:slideOut={$uiProps.showMenu == false}
-        on:click={()=>aboutDialog.open()}>   
-        <div class="logo" title="About Griffy!"><LogoIcon /></div>
+        on:click={()=>aboutDialog.open()}>
+        <div class="logo" title="About Slate!"><LogoIcon /></div>
         <div class="cog"><SvgIcon icon=faCog size="20px" color="#fff"/></div>
     </div>
 </div>
@@ -277,7 +277,7 @@
             backdrop-filter: blur(0px);
         }
     }
-    
+
     .wide .footer {
         width: 100%;
         bottom: 0;

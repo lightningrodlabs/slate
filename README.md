@@ -12,7 +12,7 @@ Outside of nix shell you will need rust installed:
 
 https://www.rust-lang.org/tools/install or https://rustup.rs/
 
-Enter the nix shell by running this in the root folder of the repository: 
+Enter the nix shell by running this in the root folder of the repository:
 
 ```bash
 nix develop
@@ -22,7 +22,7 @@ npm install
 **Run all the other instructions in this README from inside this nix-shell, otherwise they won't work**.
 
 ## Running 2 agents
- 
+
 ```bash
 npm start
 ```
@@ -36,7 +36,7 @@ It will also bring up the Holochain Playground for advanced introspection of the
 npm run dev
 ```
 
-This will not launch a UI, you will have to open a browser window and navigate to the Local address provided by VITE. It can take a moment for the UI to come up after visiting the URL, let it load. 
+This will not launch a UI, you will have to open a browser window and navigate to the Local address provided by VITE. It can take a moment for the UI to come up after visiting the URL, let it load.
 
 ## Running the backend tests
 
@@ -62,8 +62,8 @@ To package the web happ:
 npm run package
 ```
 
-You'll have the `griffy.webhapp` in `workdir`. This is what you should distribute so that the Holochain Launcher can install it.
-You will also have its subcomponent `griffy.happ` in the same folder`.
+You'll have the `slate.webhapp` in `workdir`. This is what you should distribute so that the Holochain Launcher can install it.
+You will also have its subcomponent `slate.happ` in the same folder`.
 
 ## Documentation
 

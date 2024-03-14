@@ -126,7 +126,7 @@ export class Board {
       undefined
       );
 
-    const fileStorageClient = new FileStorageClient(synStore.client.client, 'griffy');
+    const fileStorageClient = new FileStorageClient(synStore.client.client, 'slate');
 
     const me = new Board(documentStore, workspaceStore, fileStorageClient);
     await me.join()

@@ -2,12 +2,12 @@
   import { encodeHashToBase64, type AgentPubKey } from "@holochain/client";
   import "@holochain-open-dev/profiles/dist/elements/agent-avatar.js";
   import { getContext } from "svelte";
-  import type { GriffyStore } from "./store";
+  import type { SlateStore } from "./store";
   import SvgIcon from "./SvgIcon.svelte";
   import "@shoelace-style/shoelace/dist/components/skeleton/skeleton.js";
 
   const { getStore } :any = getContext("store");
-  let store: GriffyStore = getStore();
+  let store: SlateStore = getStore();
 
   export let agentPubKey: AgentPubKey
   export let size = 32
@@ -21,7 +21,7 @@
   $: agentPubKeyB64 = encodeHashToBase64(agentPubKey)
   $: profile = store.profilesStore.profiles.get(agentPubKey)
   $: nickname = $profile.status=="complete" && $profile.value ? $profile.value.entry.nickname : agentPubKeyB64.slice(5,9)+"..."
-  
+
 </script>
 
 <div class="avatar-{namePosition}"

@@ -7,12 +7,12 @@
     import '@shoelace-style/shoelace/dist/components/checkbox/checkbox.js';
     import SvgIcon from "./SvgIcon.svelte"
     import { cloneDeep } from "lodash";
-    import type { GriffyStore } from './store';
+    import type { SlateStore } from './store';
   import type { EntryHash } from '@holochain/client';
 
     const { getStore } :any = getContext('store');
 
-    const store:GriffyStore = getStore();
+    const store:SlateStore = getStore();
     $: uiProps = store.uiProps
 
     export let handleSave
@@ -78,13 +78,13 @@
 
       <sl-button class="board-control"
         variant="primary"
-        disabled={!valuesValid || saving} 
+        disabled={!valuesValid || saving}
         style="margin-left:10px; width:70px;" on:click={async () => {
           saving = true
           await handleSave(text, props)
           saving = false
           }} >
-          
+
         <span >
           {#if saving}
             <div class="spinning"><SvgIcon icon=faSpinner></SvgIcon></div>
@@ -92,13 +92,13 @@
             Save
           {/if}
         </span>
-        
+
       </sl-button>
     </div>
  </div>
 
 
-   
+
  <style>
   .board-editor {
     display: flex;

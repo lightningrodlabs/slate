@@ -37,7 +37,7 @@ export class BoardList {
 
     boardData2 = new LazyHoloHashMap( documentHash => {
         const docStore = this.synStore.documents.get(documentHash)
-        const fileStorageClient = new FileStorageClient(this.synStore.client.client, 'griffy');
+        const fileStorageClient = new FileStorageClient(this.synStore.client.client, 'slate');
 
         const board = pipe(docStore.allWorkspaces,
             workspaces =>

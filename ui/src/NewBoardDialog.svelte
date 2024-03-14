@@ -1,16 +1,16 @@
 <script lang="ts">
     import BoardEditor from './BoardEditor.svelte';
-    import type { GriffyStore } from './store';
+    import type { SlateStore } from './store';
     import { getContext } from 'svelte';
     import type { BoardProps } from './board';
     import '@shoelace-style/shoelace/dist/components/dialog/dialog.js';
     import '@shoelace-style/shoelace/dist/components/button/button.js';
     import type SlDialog from '@shoelace-style/shoelace/dist/components/dialog/dialog';
     let dialog: SlDialog
-    
+
     const { getStore } :any = getContext('store');
 
-    const store:GriffyStore = getStore();
+    const store:SlateStore = getStore();
 
     const addBoard = async (name: string, props: BoardProps) => {
         // @ts-ignore
@@ -33,7 +33,7 @@
     }}
     on:sl-request-close={(event)=>{
         if (event.detail.source === 'overlay') {
-        event.preventDefault();    
+        event.preventDefault();
   }}}>
     <BoardEditor bind:this={boardEditor}  handleSave={addBoard} cancelEdit={()=>dialog.hide()} />
 </sl-dialog>

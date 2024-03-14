@@ -3,7 +3,7 @@
   import { cloneDeep } from "lodash";
   import type { Board } from "./board";
   import { getContext } from "svelte";
-  import type { GriffyStore } from "./store";
+  import type { SlateStore } from "./store";
   import { hrlWithContextToB64} from "./util";
   import '@shoelace-style/shoelace/dist/components/button/button.js';
   import '@shoelace-style/shoelace/dist/components/dialog/dialog.js';
@@ -12,10 +12,10 @@
   import SvgIcon from "./SvgIcon.svelte";
 
   const { getStore } :any = getContext("store");
-  let store: GriffyStore = getStore();
+  let store: SlateStore = getStore();
   //let card: Card | undefined
   let attachments: Array<HrlB64WithContext> = []
- 
+
   $:attachments = attachments
 
   export let activeBoard: Board
@@ -58,7 +58,7 @@
     //   const props = cloneDeep(card.props)
     //   props.attachments = cloneDeep(attachments)
     //   activeBoard.requestChanges([{
-    //     type: 'update-card-props', 
+    //     type: 'update-card-props',
     //     id: card.id,
     //     props
     //   }])
@@ -76,8 +76,8 @@
       on:remove-attachment={(e)=>removeAttachment(e.detail)}/>
 
   <div>
-      <h3>Search Linkables:</h3> 
-  </div> 
+      <h3>Search Linkables:</h3>
+  </div>
   <sl-button style="margin-top:5px;margin-right: 5px" circle on:click={()=>addAttachment()} >
         <SvgIcon icon=link size=12 />
   </sl-button>
@@ -85,9 +85,9 @@
   <AttachmentsBind
       bind:this = {bind}
       activeBoard={activeBoard}
-      on:add-binding={(e)=>_addAttachment(e.detail)} 
+      on:add-binding={(e)=>_addAttachment(e.detail)}
       />
-  
+
   {/if}
 </sl-dialog>
 
