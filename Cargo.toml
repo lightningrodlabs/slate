@@ -9,9 +9,10 @@ members = ["dnas/*/zomes/coordinator/*", "dnas/*/zomes/integrity/*"]
 resolver = "2"
 
 [workspace.dependencies]
-hdi = "0.3"
-hdk = "0.2"
-serde = "1"
+hdi = "0.4.0-beta-dev.31"
+hdk = "0.3.0-beta-dev.35"
+serde = "1.0.193"
+holochain = "0.3.0-beta-dev.42"
 
 [workspace.dependencies.slate]
 path = "dnas/slate/zomes/coordinator/slate"

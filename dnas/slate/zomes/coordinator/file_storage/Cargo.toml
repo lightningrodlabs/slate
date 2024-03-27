@@ -13,10 +13,10 @@ hdk = { workspace = true }
 serde = { workspace = true }
 
 file_storage_integrity = { workspace = true }
-hc_zome_file_storage_coordinator = "0.2.0"
+hc_zome_file_storage_coordinator = { git = "https://github.com/holochain-open-dev/file-storage", branch = "for-hdk-0.3.0-beta-dev" }
 
 [dev-dependencies]
-fixt = "0.2.6"
+fixt = "0.3.0-beta-dev.2"
 futures = { version = "0.3.1", default-features = false }
 hdk = { workspace = true, features = ["encoding", "test_utils"] }
 holochain = { worskpace = true, default-features = false, features = [

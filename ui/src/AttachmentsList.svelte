@@ -2,13 +2,12 @@
   import "@shoelace-style/shoelace/dist/components/skeleton/skeleton.js";
   import { createEventDispatcher, getContext } from "svelte";
   import type { SlateStore } from "./store";
-  import { hrlB64WithContextToRaw } from "./util";
-  import type { HrlB64WithContext } from "@lightningrodlabs/we-applet";
+  import type { WAL } from "@lightningrodlabs/we-applet";
   import SvgIcon from "./SvgIcon.svelte";
 
   const dispatch = createEventDispatcher()
 
-  export let attachments: Array<HrlB64WithContext>
+  export let attachments: Array<WAL>
   export let allowDelete = true
 
   const { getStore } :any = getContext("store");
@@ -21,17 +20,16 @@
       class:attachment-item-with-delete={allowDelete}
       class:attachment-item={!allowDelete}
     >
-      {#await store.weClient.attachableInfo(hrlB64WithContextToRaw(attachment))}
+      {#await store.weClient.assetInfo(attachment)}
         <sl-button size="small" loading></sl-button>
-      {:then { attachableInfo }}
+      {:then { assetInfo }}
         <sl-button  size="small"
           on:click={(e)=>{
               e.stopPropagation()
-              const hrlWithContext = hrlB64WithContextToRaw(attachment)
-              store.weClient.openHrl(hrlWithContext)
+              store.weClient.openWal(attachment)
             }}
-          style="display:flex;flex-direction:row;margin-right:5px"><sl-icon src={attachableInfo.icon_src} slot="prefix"></sl-icon>
-          {attachableInfo.name}
+          style="display:flex;flex-direction:row;margin-right:5px"><sl-icon src={assetInfo.icon_src} slot="prefix"></sl-icon>
+          {assetInfo.name}
         </sl-button>
         {#if allowDelete}
           <sl-button size="small"

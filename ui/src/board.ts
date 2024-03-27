@@ -4,14 +4,14 @@ import { FileStorageClient } from "@holochain-open-dev/file-storage";
 import { get, type Readable } from "svelte/store";
 import { v1 as uuidv1 } from "uuid";
 import { type AgentPubKey, type EntryHash, type EntryHashB64, encodeHashToBase64, type AgentPubKeyB64, type Timestamp } from "@holochain/client";
+import type { WAL } from "@lightningrodlabs/we-applet";
 import { BoardType } from "./boardList";
-import type { HrlB64WithContext } from "@lightningrodlabs/we-applet";
 import type { AppState, ExcalidrawElement, BinaryFiles } from "@excalidraw/excalidraw/types";
-import { dataURItoBlob } from "./util";
+import { dataURItoBlob, type WALUrl } from "./util";
 
 export type BoardProps = {
   bgUrl: string,
-  attachments: Array<HrlB64WithContext>
+  attachments: Array<WAL>
 }
 
 export type BoardEphemeralState = { [key: string]: string };
@@ -19,7 +19,7 @@ export type BoardEphemeralState = { [key: string]: string };
 export interface BoardState {
   name: string;
   props: BoardProps;
-  boundTo: Array<HrlB64WithContext>
+  boundTo: Array<WALUrl>
   excalidrawElements: ExcalidrawElement[];
   excalidrawAppState: AppState;
   excalidrawFileHashes: { [id: string]: EntryHashB64 };

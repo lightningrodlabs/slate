@@ -5,7 +5,6 @@ import {
   type AppAgentCallZomeRequest,
   type RoleName,
   encodeHashToBase64,
-  type EntryHashB64,
   type AgentPubKey,
   decodeHashFromBase64,
   type Timestamp,
@@ -15,8 +14,7 @@ import { SynStore,  SynClient} from '@holochain-syn/core';
 import { BoardList } from './boardList';
 import TimeAgo from "javascript-time-ago"
 import en from 'javascript-time-ago/locale/en'
-import type { v1 as uuidv1 } from "uuid";
-import { get, writable, type Unsubscriber, type Writable } from "svelte/store";
+import { writable, type Unsubscriber, type Writable } from "svelte/store";
 import type { ProfilesStore } from '@holochain-open-dev/profiles';
 import type { BoardState } from './board';
 import type { WeClient } from '@lightningrodlabs/we-applet';
