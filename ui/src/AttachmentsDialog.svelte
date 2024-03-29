@@ -8,11 +8,12 @@
   import '@shoelace-style/shoelace/dist/components/dialog/dialog.js';
   import AttachmentsList from "./AttachmentsList.svelte";
   import SvgIcon from "./SvgIcon.svelte";
+  import type { WALUrl } from "./util";
 
   const { getStore } :any = getContext("store");
   let store: SlateStore = getStore();
   //let card: Card | undefined
-  let attachments: Array<WAL> = []
+  let attachments: Array<WALUrl> = []
 
   $:attachments = attachments
 
@@ -44,7 +45,7 @@
   }
 
   const _addAttachment = (wal: WAL) => {
-    attachments.push(wal)
+    attachments.push(weaveUrlFromWal(wal))
     attachments = attachments
     handleSave()
   }
@@ -75,7 +76,7 @@
       <h3>Search Linkables:</h3>
   </div>
   <sl-button style="margin-top:5px;margin-right: 5px" circle on:click={()=>addAttachment()} >
-        <SvgIcon icon=link size=12 />
+        <SvgIcon icon=searchPlus size=30 />
   </sl-button>
 
   {/if}

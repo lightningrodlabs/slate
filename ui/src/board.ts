@@ -11,7 +11,7 @@ import { dataURItoBlob, type WALUrl } from "./util";
 
 export type BoardProps = {
   bgUrl: string,
-  attachments: Array<WAL>
+  attachments: Array<WALUrl>
 }
 
 export type BoardEphemeralState = { [key: string]: string };

@@ -19,6 +19,7 @@
   import { Excalidraw, getSceneVersion } from "@excalidraw/excalidraw";
   import ReactAdapter from "./ReactAdapter.svelte";
   import AboutDialog from "./AboutDialog.svelte";
+  import type { WAL } from "@lightningrodlabs/we-applet";
 
   const { getStore } :any = getContext("store");
   let store: SlateStore = getStore();
@@ -106,10 +107,9 @@
 
   let attachmentsDialog : AttachmentsDialog
 
-  const removeAttachment = (props: BoardProps, idx: number) => {
-    let newProps = cloneDeep(props)
-    newProps.attachments.splice(idx,1)
-    activeBoard.requestChanges([{type: 'set-props', props : newProps }])
+  const walToPocket = () => {
+    const attachment: WAL = { hrl: [store.dnaHash, activeBoard.hash], context: "" }
+    store.weClient?.walToPocket(attachment)
   }
 
   const updateExcalidrawState = throttle((excalidrawElements, excalidrawAppState, excalidrawFiles) => {
@@ -165,8 +165,11 @@
             </div>
           {/if}
           <div style="margin-left:10px; margin-top:2px;display:flex">
-            <button class="attachment-button" style="margin-right:10px" on:click={()=>attachmentsDialog.open(undefined)} >
-              <SvgIcon icon="link" size="16px"/>
+            <button title="Add Board to Pocket" class="attachment-button" style="margin-right:10px" on:click={()=>walToPocket()} >          
+              <SvgIcon icon="addToPocket" size="20px"/>
+            </button>
+            <button title="Manage Board Attachments" class="attachment-button" style="margin-right:10px" on:click={()=>attachmentsDialog.open(undefined)} >          
+              <SvgIcon icon="link" size="20px"/>
             </button>
             {#if $state.props.attachments}
               <AttachmentsList attachments={$state.props.attachments}
