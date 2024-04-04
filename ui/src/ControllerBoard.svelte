@@ -40,22 +40,19 @@
   <div class="flex-scrollable-parent">
     <div class="flex-scrollable-container">
       <div class='app'>
-
-      <div class="wrapper">
-
-      <div class="workspace" style="display:flex">
-
-
-        {#if $activeBoardHash !== undefined}
-          <SlatePane activeBoard={$activeBoard} standAlone={true}/>
-        {:else}
-          Unable to find board.
-        {/if}
-        </div>
-        </div>
+        <div class="wrapper">
+          <div class="workspace" style="display:flex">
+            {#if $activeBoardHash !== undefined}
+              <SlatePane activeBoard={$activeBoard} standAlone={true}/>
+            {:else}
+              Unable to find board.
+            {/if}
+          </div>
+      </div>
     </div>
   </div>
 </div>
+
 <style>
   .app {
     margin: 0;
@@ -103,6 +100,11 @@
   .wrapper {
     position: relative;
     z-index: 10;
+    height: 100%;
+  }
+
+  .workspace {
+    height: 100%;
   }
 
 </style>

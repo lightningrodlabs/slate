@@ -1,83 +1,83 @@
 <script lang="ts">
-    import Toolbar from './Toolbar.svelte'
-    import SlatePane from './SlatePane.svelte'
-    import { SlateStore } from './store'
-    import { setContext } from 'svelte';
-    import type { AppAgentClient } from '@holochain/client';
-    import type { SynStore } from '@holochain-syn/store';
-    import type { ProfilesStore } from "@holochain-open-dev/profiles";
-    import BoardMenu from "./BoardMenu.svelte";
-    import type { WeClient } from '@lightningrodlabs/we-applet';
+  import Toolbar from './Toolbar.svelte'
+  import SlatePane from './SlatePane.svelte'
+  import { SlateStore } from './store'
+  import { setContext } from 'svelte';
+  import type { AppAgentClient } from '@holochain/client';
+  import type { SynStore } from '@holochain-syn/store';
+  import type { ProfilesStore } from "@holochain-open-dev/profiles";
+  import BoardMenu from "./BoardMenu.svelte";
+  import type { WeClient } from '@lightningrodlabs/we-applet';
 
-    export let roleName = ""
-    export let client : AppAgentClient
-    export let weClient : WeClient
-    export let profilesStore : ProfilesStore
+  export let roleName = ""
+  export let client : AppAgentClient
+  export let weClient : WeClient
+  export let profilesStore : ProfilesStore
 
-    let store: SlateStore = new SlateStore (
-      weClient,
-      profilesStore,
-      client,
-      roleName,
-    );
-    let synStore: SynStore = store.synStore
+  let store: SlateStore = new SlateStore (
+    weClient,
+    profilesStore,
+    client,
+    roleName,
+  );
+  let synStore: SynStore = store.synStore
 
-    $: activeBoardHash = store.boardList.activeBoardHash
-    $: activeBoard = store.boardList.activeBoard
+  $: activeBoardHash = store.boardList.activeBoardHash
+  $: activeBoard = store.boardList.activeBoard
 
-    setContext('synStore', {
-      getStore: () => synStore,
-    });
+  setContext('synStore', {
+    getStore: () => synStore,
+  });
 
-    setContext('store', {
-      getStore: () => store,
-    });
-    const DEFAULT_KD_BG_IMG = "none"
-    //const DEFAULT_KD_BG_IMG = "https://img.freepik.com/free-photo/studio-background-concept-abstract-empty-light-gradient-purple-studio-room-background-product-plain-studio-background_1258-54461.jpg"
-    const NO_BOARD_IMG = "none"
-    $: uiProps = store.uiProps
-    $: boardCount = store.boardList.boardCount
+  setContext('store', {
+    getStore: () => store,
+  });
+  const DEFAULT_KD_BG_IMG = "none"
+  //const DEFAULT_KD_BG_IMG = "https://img.freepik.com/free-photo/studio-background-concept-abstract-empty-light-gradient-purple-studio-room-background-product-plain-studio-background_1258-54461.jpg"
+  const NO_BOARD_IMG = "none"
+  $: uiProps = store.uiProps
+  $: boardCount = store.boardList.boardCount
 
-    $: bgUrl = DEFAULT_KD_BG_IMG  // FIXME$activeBoard ?   ($activeBoard.state.props && $boardState.props.bgUrl) ? $boardState.props.bgUrl : DEFAULT_KD_BG_IMG
-    $: bgImage = `background-image: url("`+ bgUrl+`");`
-    let menuVisible = false
-  </script>
-  <div class="flex-scrollable-parent">
-    <div class="flex-scrollable-container">
-      <div class='app'>
+  $: bgUrl = DEFAULT_KD_BG_IMG  // FIXME$activeBoard ?   ($activeBoard.state.props && $boardState.props.bgUrl) ? $boardState.props.bgUrl : DEFAULT_KD_BG_IMG
+  $: bgImage = `background-image: url("`+ bgUrl+`");`
+  let menuVisible = false
+</script>
 
+<div class="flex-scrollable-parent">
+  <div class="flex-scrollable-container">
+    <div class='app'>
       <div class="wrapper">
+        <div class="header">
+          <Toolbar
+            profilesStore={profilesStore}/>
+        </div>
 
-      <div class="header">
-        <Toolbar
-          profilesStore={profilesStore}/>
+        <div class="workspace" style="display:flex">
+          {#if $uiProps.showMenu && $boardCount.status == "complete"}
+            {#if $activeBoardHash === undefined}
+            <div class="board-menu" >
+                <BoardMenu wide={true}></BoardMenu>
+              </div>
+            {:else}
+              <div class="board-menu">
+                <BoardMenu wide={false}></BoardMenu>
+              </div>
+            {/if}
+          {:else}
+            <div class="board-menu slideOut">
+              <BoardMenu wide={false}></BoardMenu>
+            </div>
+          {/if}
+
+          {#if $activeBoardHash !== undefined}
+            <SlatePane activeBoard={$activeBoard}/>
+          {/if}
+        </div>
       </div>
-      <div class="workspace" style="display:flex">
-      {#if $uiProps.showMenu && $boardCount.status == "complete"}
-        {#if $activeBoardHash === undefined}
-         <div class="board-menu" >
-            <BoardMenu wide={true}></BoardMenu>
-          </div>
-        {:else}
-          <div class="board-menu">
-            <BoardMenu wide={false}></BoardMenu>
-          </div>
-        {/if}
-      {:else}
-        <div class="board-menu slideOut">
-          <BoardMenu wide={false}></BoardMenu>
-        </div>
-      {/if}
-
-
-        {#if $activeBoardHash !== undefined}
-          <SlatePane activeBoard={$activeBoard}/>
-        {/if}
-        </div>
-        </div>
     </div>
   </div>
 </div>
+
 <style>
   .app {
     margin: 0;
@@ -175,6 +175,11 @@
   .wrapper {
     position: relative;
     z-index: 10;
+    height: 100%
+  }
+
+  .workspace {
+    height: 100%;
   }
 
   /* .my-boards {
