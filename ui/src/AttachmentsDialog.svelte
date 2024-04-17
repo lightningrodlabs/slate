@@ -69,16 +69,15 @@
 
 <sl-dialog label={"Board Links"} bind:this={dialog}>
   {#if isWeContext()}
-  <AttachmentsList attachments={attachments}
-      on:remove-attachment={(e)=>removeAttachment(e.detail)}/>
+    <AttachmentsList attachments={attachments} on:remove-attachment={(e)=>removeAttachment(e.detail)}/>
 
-  <div>
+    <div>
       <h3>Search Linkables:</h3>
-  </div>
-  <sl-button style="margin-top:5px;margin-right: 5px" circle on:click={()=>addAttachment()} >
-        <SvgIcon icon=searchPlus size=30 />
-  </sl-button>
+    </div>
 
+    <sl-button style="margin-top:5px;margin-right: 5px" circle on:click={()=>addAttachment()}>
+      <SvgIcon icon=searchPlus size=30 />
+    </sl-button>
   {/if}
 </sl-dialog>
 

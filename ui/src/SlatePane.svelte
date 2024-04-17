@@ -1,4 +1,6 @@
 <script lang="ts">
+  import React from 'react';
+  import ReactDOM from 'react-dom';
   import { getContext, afterUpdate, onMount } from "svelte";
   import type { SlateStore } from "./store";
   import { v1 as uuidv1 } from "uuid";
@@ -119,6 +121,10 @@
     }
   }, 3000, { 'leading': true })
 
+  const embedToolFrame = (element, state) => {
+    return React.createElement('iframe', { src: element.link, style: { width: "100%", height: "100%", bgColor: "black"}})
+  }
+
 </script>
 <div class="board" >
 
@@ -165,10 +171,10 @@
             </div>
           {/if}
           <div style="margin-left:10px; margin-top:2px;display:flex">
-            <button title="Add Board to Pocket" class="attachment-button" style="margin-right:10px" on:click={()=>walToPocket()} >          
+            <button title="Add Board to Pocket" class="attachment-button" style="margin-right:10px" on:click={()=>walToPocket()} >
               <SvgIcon icon="addToPocket" size="20px"/>
             </button>
-            <button title="Manage Board Attachments" class="attachment-button" style="margin-right:10px" on:click={()=>attachmentsDialog.open(undefined)} >          
+            <button title="Manage Board Attachments" class="attachment-button" style="margin-right:10px" on:click={()=>attachmentsDialog.open(undefined)} >
               <SvgIcon icon="link" size="20px"/>
             </button>
             {#if $state.props.attachments}
@@ -206,6 +212,8 @@
         excalidrawAPI={setExcalidrawAPI}
         initialData={{ elements: $state.excalidrawElements, appState: {} }}
         onChange={updateExcalidrawState}
+        renderEmbeddable={(element, appState) => { return embedToolFrame(element, state) }}
+        validateEmbeddable={(link) => { return true }}
       />
     </div>
   {/if}

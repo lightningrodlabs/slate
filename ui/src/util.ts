@@ -1,4 +1,5 @@
-import {type AppAgentClient, type EntryHash, type DnaHash, CellType } from "@holochain/client";
+import {type AppAgentClient, type EntryHash, type DnaHash, CellType, encodeHashToBase64, type HoloHashB64 } from "@holochain/client";
+import type { AppletHash } from '@lightningrodlabs/we-applet';
 
 export function onVisible(element, callback) {
     new IntersectionObserver((entries, observer) => {
@@ -45,4 +46,12 @@ export const dataURItoBlob = (dataURI) => {
       ia[i] = byteString.charCodeAt(i);
   }
   return new Blob([ab], {type: mimeString});
+}
+
+export function appletOrigin(appletHash: AppletHash): string {
+  return `applet://${toLowerCaseB64(encodeHashToBase64(appletHash))}`;
+}
+
+export function toLowerCaseB64(hashb64: HoloHashB64): string {
+  return hashb64.replace(/[A-Z]/g, (match) => match.toLowerCase() + '$');
 }

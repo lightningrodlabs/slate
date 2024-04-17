@@ -14,11 +14,11 @@ hdk = "0.3.0-beta-dev.35"
 serde = "1.0.193"
 holochain = "0.3.0-beta-dev.42"
 
-[workspace.dependencies.slate]
-path = "dnas/slate/zomes/coordinator/slate"
+#[workspace.dependencies.slate]
+#path = "dnas/slate/zomes/coordinator/slate"
 
-[workspace.dependencies.slate_integrity]
-path = "dnas/slate/zomes/integrity/slate"
+#[workspace.dependencies.slate_integrity]
+#path = "dnas/slate/zomes/integrity/slate"
 
 [workspace.dependencies.profiles]
 path = "dnas/slate/zomes/coordinator/profiles"

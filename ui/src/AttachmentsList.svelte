@@ -2,11 +2,9 @@
   import "@shoelace-style/shoelace/dist/components/skeleton/skeleton.js";
   import { createEventDispatcher, getContext } from "svelte";
   import type { SlateStore } from "./store";
-  import type { WAL } from "@lightningrodlabs/we-applet";
   import { weaveUrlToWAL } from "@lightningrodlabs/we-applet";
-  import SvgIcon from "./SvgIcon.svelte";
   import { hrlToString } from "@holochain-open-dev/utils";
-  import type { WALUrl } from "./util";
+  import { appletOrigin, type WALUrl } from "./util";
 
   const dispatch = createEventDispatcher()
 
@@ -15,11 +13,11 @@
 
   const { getStore } :any = getContext("store");
   let store: SlateStore = getStore();
-
 </script>
+
 <div class="attachments-list">
   {#each attachments as attachment, index}
-  {@const wal = weaveUrlToWAL(attachment)}
+    {@const wal = weaveUrlToWAL(attachment)}
     <div
       class:attachment-item-with-delete={allowDelete}
       class:attachment-item={!allowDelete}
@@ -34,7 +32,8 @@
                 e.stopPropagation()
                 try {
   //                embedLink = index
-                  await store.weClient.openWal(wal)
+                  await store.weClient.openWal(wal);
+                  await navigator.clipboard.writeText(appletOrigin(data.appletHash) + "?view=applet-view&view-type=asset&hrl=" + hrlToString(wal.hrl));
                 } catch(e) {
                   alert(`Error opening link: ${e}`)
                 }
@@ -42,9 +41,8 @@
             style="display:flex;flex-direction:row;margin-right:5px"><sl-icon src={assetInfo.icon_src} slot="prefix"></sl-icon>
             {assetInfo.name}
           </sl-button>
-        {:else} 
-        <div style="color:red; cursor:pointer; padding: 0 5px 0 5px; border: dashed 1px;margin-right:5px" title={`Failed to resolve WAL: ${hrlToString(wal.hrl)}?${JSON.stringify(wal.context)}`}>Bad WAL</div>
-
+        {:else}
+          <div style="color:red; cursor:pointer; padding: 0 5px 0 5px; border: dashed 1px;margin-right:5px" title={`Failed to resolve WAL: ${hrlToString(wal.hrl)}?${JSON.stringify(wal.context)}`}>Bad WAL</div>
         {/if}
       {:catch error}
         <div style="color:red">Error getting asset info: {error}</div>
