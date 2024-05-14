@@ -9,6 +9,7 @@
     import LogoIcon from "./icons/LogoIcon.svelte";
     import BoardMenuItem from "./BoardMenuItem.svelte";
     import { BoardType } from "./boardList";
+  import { isWeContext } from "@lightningrodlabs/we-applet";
     export let wide = false
 
     let newBoardDialog
@@ -43,7 +44,9 @@
 <div class="board-menu"
     class:wide={wide} >
 
-    <GroupParticipants/>
+    {#if !isWeContext()}
+        <GroupParticipants/>
+    {/if}
         <h3 class="type-header">Canvases</h3>
         <div class="boards-section">
             <div class="new-board" on:click={()=>newBoardDialog.open()} title="New Canvas"><SvgIcon color="white" size=25px icon=faSquarePlus style="margin-left: 15px;"/><span>New Canvas</span></div>
@@ -242,7 +245,7 @@
         border-radius: 0;
         bottom: 0px;
         height: 40px;
-        display: block;
+        display: flex;
         align-items: center;
         width: 330px;
         left: 0;
@@ -292,7 +295,9 @@
     }
 
     .logo {
-        width: 20px;
+        width: 30px;
+        height: 30px;
+        margin-right: 10px;
     }
 
     .board-bg {

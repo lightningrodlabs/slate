@@ -78,7 +78,7 @@ export default defineConfig({
         },
         source: {
           type: "https",
-          url: "https://github.com/holochain-apps/kando/releases/download/v0.9.5/kando.webhapp"
+          url: "https://github.com/holochain-apps/kando/releases/download/v0.9.8/kando.webhapp"
         },
       },
       {
@@ -91,7 +91,7 @@ export default defineConfig({
       },
       source: {
         type: 'https',
-        url: 'https://github.com/lightningrodlabs/notebooks/releases/download/v0.2.3/notebooks.webhapp',
+        url: 'https://github.com/lightningrodlabs/notebooks/releases/download/v0.2.10/notebooks.webhapp',
       },
     },
   ],
