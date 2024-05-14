@@ -1,7 +1,7 @@
 import { HoloHashMap, LazyHoloHashMap } from "@holochain-open-dev/utils";
 import { derived, get, writable, type Readable, type Writable } from "svelte/store";
 import { type AgentPubKey, type EntryHash, type EntryHashB64, encodeHashToBase64 } from "@holochain/client";
-import {toPromise, type AsyncReadable, pipe, joinAsync, asyncDerived, sliceAndJoin, alwaysSubscribed} from '@holochain-open-dev/stores'
+import {toPromise, type AsyncReadable, pipe, joinAsync, asyncDerived, sliceAndJoin, alwaysSubscribed, type AsyncStatus} from '@holochain-open-dev/stores'
 import { FileStorageClient } from "@holochain-open-dev/file-storage";
 import { SynStore, WorkspaceStore } from "@holochain-syn/core";
 import type { ProfilesStore } from "@holochain-open-dev/profiles";
@@ -66,10 +66,6 @@ export class BoardList {
             console.log("boardData2:main")
             return alwaysSubscribed(pipe(joinAsync([board, latestState, tip]), ([board, latestState, tip]) => {return {board,latestState, tip: tip ? tip.entryHash: undefined}}))
         })
-
-        const allDocumentAuthors = pipe(this.activeBoardHashes,
-            documentHashes => joinAsync(documentHashes.map(documentHash=>this.synStore.documents.get(documentHash).allAuthors), {errors: "filter_out"}),
-            )
 
         // const activeTypedHashes = asyncDerived(boardHashes, hashes=>hashes.map(hash=>{const h:TypedHash = {hash, type:BoardType.active}; return h}))
         // const archivedTypedHashes = asyncDerived(archivedHashes, hashes=>hashes.map(hash=>{const h:TypedHash = {hash,type:BoardType.archived}; return h}))
