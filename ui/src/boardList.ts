@@ -35,29 +35,37 @@ export class BoardList {
     activeBoardHashB64: Readable<string| undefined> = derived(this.activeBoardHash, s=> s ? encodeHashToBase64(s): undefined)
     boardCount: AsyncReadable<number>
 
-    boardData2 = new LazyHoloHashMap( documentHash => {
-        const docStore = this.synStore.documents.get(documentHash)
-        const fileStorageClient = new FileStorageClient(this.synStore.client.client, 'slate');
+    boardData2: LazyHoloHashMap<Uint8Array, Readable<AsyncStatus<{
+        board: Board;
+        latestState: BoardState;
+        tip: Uint8Array;
+    }>>>
 
-        const board = pipe(docStore.allWorkspaces,
-            workspaces =>
-                new Board(docStore,  new WorkspaceStore(docStore, Array.from(workspaces.keys())[0]), fileStorageClient)
-        )
-        const latestState = pipe(board,
-            board => board.workspace.latestSnapshot
-            )
-        const tip = pipe(board,
-            board => board.workspace.tip
-            )
-        console.log("boardData2:main")
-        return alwaysSubscribed(pipe(joinAsync([board, latestState, tip]), ([board, latestState, tip]) => {return {board,latestState, tip: tip ? tip.entryHash: undefined}}))
-    })
+    fileStorageClient: FileStorageClient
 
     constructor(public profilseStore: ProfilesStore, public synStore: SynStore) {
         const boardHashes = asyncDerived(this.synStore.documentsByTag.get(BoardType.active),x=>Array.from(x.keys()))
         this.activeBoardHashes = boardHashes
         const archivedHashes = asyncDerived(this.synStore.documentsByTag.get(BoardType.archived),x=>Array.from(x.keys()))
         this.archivedBoardHashes = archivedHashes
+        this.fileStorageClient = new FileStorageClient(this.synStore.client.client, 'slate');
+
+        this.boardData2 = new LazyHoloHashMap( documentHash => {
+            const docStore = this.synStore.documents.get(documentHash)
+    
+            const board = pipe(docStore.allWorkspaces,
+                workspaces =>
+                    new Board(docStore,  new WorkspaceStore(docStore, Array.from(workspaces.keys())[0]), this.fileStorageClient)
+            )
+            const latestState = pipe(board,
+                board => board.workspace.latestSnapshot
+                )
+            const tip = pipe(board,
+                board => board.workspace.tip
+                )
+            console.log("boardData2:main")
+            return alwaysSubscribed(pipe(joinAsync([board, latestState, tip]), ([board, latestState, tip]) => {return {board,latestState, tip: tip ? tip.entryHash: undefined}}))
+        })
 
         const allDocumentAuthors = pipe(this.activeBoardHashes,
             documentHashes => joinAsync(documentHashes.map(documentHash=>this.synStore.documents.get(documentHash).allAuthors), {errors: "filter_out"}),
