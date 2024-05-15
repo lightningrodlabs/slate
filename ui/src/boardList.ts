@@ -43,7 +43,7 @@ export class BoardList {
 
     fileStorageClient: FileStorageClient
 
-    constructor(public profilseStore: ProfilesStore, public synStore: SynStore) {
+    constructor(public profilesStore: ProfilesStore, public synStore: SynStore) {
         const boardHashes = asyncDerived(this.synStore.documentsByTag.get(BoardType.active),x=>Array.from(x.keys()))
         this.activeBoardHashes = boardHashes
         const archivedHashes = asyncDerived(this.synStore.documentsByTag.get(BoardType.archived),x=>Array.from(x.keys()))
@@ -52,7 +52,7 @@ export class BoardList {
 
         this.boardData2 = new LazyHoloHashMap( documentHash => {
             const docStore = this.synStore.documents.get(documentHash)
-    
+
             const board = pipe(docStore.allWorkspaces,
                 workspaces =>
                     new Board(docStore,  new WorkspaceStore(docStore, Array.from(workspaces.keys())[0]), this.fileStorageClient)
