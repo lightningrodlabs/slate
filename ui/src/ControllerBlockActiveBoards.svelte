@@ -1,19 +1,19 @@
 <script lang="ts">
   import { SlateStore } from './store'
   import { setContext } from 'svelte';
-  import type { AppAgentClient } from '@holochain/client';
+  import type { AppClient } from '@holochain/client';
   import type { SynStore } from '@holochain-syn/store';
   import type { ProfilesStore } from "@holochain-open-dev/profiles";
   import BoardMenu from "./BoardMenu.svelte";
-  import type { WeClient } from '@lightningrodlabs/we-applet';
+  import type { WeaveClient } from '@lightningrodlabs/we-applet';
 
   export let roleName = ""
-  export let client : AppAgentClient
-  export let weClient : WeClient
+  export let client : AppClient
+  export let weaveClient : WeaveClient
   export let profilesStore : ProfilesStore
 
   let store: SlateStore = new SlateStore (
-    weClient,
+    weaveClient,
     profilesStore,
     client,
     roleName,

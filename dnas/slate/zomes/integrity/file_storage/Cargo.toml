@@ -1,6 +1,6 @@
 [package]
 name = "file_storage_integrity"
-version = "0.2.0"
+version = "0.0.1"
 edition = "2021"
 
 [lib]
@@ -8,7 +8,7 @@ crate-type = ["cdylib", "rlib"]
 name = "file_storage_integrity"
 
 [dependencies]
-hc_zome_file_storage_integrity = { git = "https://github.com/holochain-open-dev/file-storage", branch = "for-hdk-0.3.0-beta-dev" }
+hc_zome_file_storage_integrity = { git = "https://github.com/holochain-open-dev/file-storage", branch = "nixify" }
 hdi = { workspace = true }
 
 serde = { workspace = true }

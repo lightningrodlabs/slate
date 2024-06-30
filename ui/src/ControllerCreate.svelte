@@ -1,22 +1,22 @@
 <script lang="ts">
     import { SlateStore } from './store'
     import { setContext } from 'svelte';
-    import type { AppAgentClient } from '@holochain/client';
+    import type { AppClient } from '@holochain/client';
     import { SynStore } from '@holochain-syn/store';
     import type { ProfilesStore } from "@holochain-open-dev/profiles";
-    import type { WeClient } from '@lightningrodlabs/we-applet';
+    import type { WeaveClient } from '@lightningrodlabs/we-applet';
     import { SynClient } from '@holochain-syn/core';
     import { getMyDna } from './util';
     import { Board } from './board';
 
     export let roleName = ""
-    export let client : AppAgentClient
-    export let weClient : WeClient
+    export let client : AppClient
+    export let weaveClient : WeaveClient
     export let profilesStore : ProfilesStore
     export let view
 
     let store: SlateStore = new SlateStore (
-      weClient,
+      weaveClient,
       profilesStore,
       client,
       roleName,
@@ -44,7 +44,7 @@
           on:sl-input={(e)=>disabled = !e.target.value}
           label="Board Name"></sl-input>
           <div style="margin-top:10px;display:flex;justify-content:flex-end">
-            <sl-button 
+            <sl-button
               style="margin-right:10px;"
               disabled={disabled}
               on:click={async ()=>{

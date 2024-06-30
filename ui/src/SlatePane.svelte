@@ -111,7 +111,7 @@
 
   const walToPocket = () => {
     const attachment: WAL = { hrl: [store.dnaHash, activeBoard.hash], context: "" }
-    store.weClient?.walToPocket(attachment)
+    store.weaveClient?.walToPocket(attachment)
   }
 
   const updateExcalidrawState = throttle((excalidrawElements, excalidrawAppState, excalidrawFiles) => {
@@ -162,7 +162,7 @@
             </sl-menu-item>
           </sl-menu>
         </sl-dropdown>
-        {#if store.weClient}
+        {#if store.weaveClient}
           <AttachmentsDialog activeBoard={activeBoard} bind:this={attachmentsDialog}></AttachmentsDialog>
           {#if $state.boundTo.length>0}
             <div style="margin-left:10px;display:flex; align-items: center">

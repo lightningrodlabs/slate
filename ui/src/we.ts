@@ -3,9 +3,9 @@ import type { BoardEphemeralState, BoardState } from './board';
 import { asyncDerived, pipe, sliceAndJoin, toPromise } from '@holochain-open-dev/stores';
 import { BoardType } from './boardList';
 import { LazyHoloHashMap } from '@holochain-open-dev/utils';
-import type { AppletHash, AppletServices, AssetInfo, WAL, WeServices } from '@lightningrodlabs/we-applet';
+import type { AppletHash, AppletServices, AssetInfo, RecordInfo, WAL, WeaveServices } from '@lightningrodlabs/we-applet';
 import { getMyDna } from './util';
-import type { AppAgentClient, RoleName, ZomeName } from '@holochain/client';
+import type { AppClient, RoleName, ZomeName } from '@holochain/client';
 
 const ROLE_NAME = "slate"
 const ZOME_NAME = "syn"
@@ -27,7 +27,7 @@ export const appletServices: AppletServices = {
         icon_src: BOARD_ICON_SRC,
       }
     },
-    bindAsset: async (appletClient: AppAgentClient,
+    bindAsset: async (appletClient: AppClient,
       srcWal: WAL, dstWal: WAL): Promise<void> => {
       console.log("Bind requested.  Src:", srcWal, "  Dst:", dstWal)
     },
@@ -41,34 +41,40 @@ export const appletServices: AppletServices = {
       },
     },
     getAssetInfo: async (
-      appletClient: AppAgentClient,
-      roleName: RoleName,
-      integrityZomeName: ZomeName,
-      entryType: string,
-      wal: WAL
+      appletClient: AppClient,
+      wal: WAL,
+      recordInfo: RecordInfo
     ): Promise<AssetInfo | undefined> => {
-      if (entryType == "document") {
-        const synClient = new SynClient(appletClient, roleName, ZOME_NAME);
-        const synStore = new SynStore(synClient);
-        const documentHash = wal.hrl[1]
-        const docStore = new DocumentStore<BoardState, BoardEphemeralState> (synStore, documentHash)
-        const workspaces = await toPromise(docStore.allWorkspaces)
-        const workspace = new WorkspaceStore(docStore, Array.from(workspaces.keys())[0])
-        const latestSnapshot = await toPromise(workspace.latestSnapshot)
+      if (recordInfo) {
+        const roleName: RoleName = recordInfo.roleName
+        // const integrityZomeName: ZomeName = recordInfo.integrityZomeName
+        const entryType: string = recordInfo.entryType
+
+        if (entryType == "document") {
+          const synClient = new SynClient(appletClient, roleName, ZOME_NAME);
+          const synStore = new SynStore(synClient);
+          const documentHash = wal.hrl[1]
+          const docStore = new DocumentStore<BoardState, BoardEphemeralState> (synStore, documentHash)
+          const workspaces = await toPromise(docStore.allWorkspaces)
+          const workspace = new WorkspaceStore(docStore, Array.from(workspaces.keys())[0])
+          const latestSnapshot = await toPromise(workspace.latestSnapshot)
 
 
-        return {
-          icon_src: BOARD_ICON_SRC,
-          name: latestSnapshot.name,
-        };
+          return {
+            icon_src: BOARD_ICON_SRC,
+            name: latestSnapshot.name,
+          };
+        } else {
+          throw new Error("unknown entry type:"+ entryType)
+        }
       } else {
-        throw new Error("unknown entry type:"+ entryType)
+        throw new Error("Null WAL not supported, must supply a recordInfo")
       }
     },
     search: async (
-      appletClient: AppAgentClient,
+      appletClient: AppClient,
       appletHash: AppletHash,
-      weServices: WeServices,
+      weaveServices: WeaveServices,
       searchFilter: string
     ): Promise<Array<WAL>> => {
         const synClient = new SynClient(appletClient, ROLE_NAME, ZOME_NAME);
