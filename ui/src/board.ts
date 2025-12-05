@@ -4,7 +4,7 @@ import { FileStorageClient } from "@holochain-open-dev/file-storage";
 import { get, type Readable } from "svelte/store";
 import { v1 as uuidv1 } from "uuid";
 import { type AgentPubKey, type EntryHash, type EntryHashB64, encodeHashToBase64, type AgentPubKeyB64, type Timestamp } from "@holochain/client";
-import type { WAL } from "@lightningrodlabs/we-applet";
+import type { WAL } from "@theweave/api";
 import { BoardType } from "./boardList";
 import type { AppState, ExcalidrawElement, BinaryFiles } from "@excalidraw/excalidraw/types";
 import { dataURItoBlob, type WALUrl } from "./util";
@@ -150,7 +150,12 @@ export class Board {
   }
 
   async join() {
-    if (!this.session) this.session = await this.workspace.joinSession()
+    if (!this.session) this.session = await this.workspace.joinSession({
+      hearbeatInterval: 5 * 1000,
+      newPeersDiscoveryInterval: 30 * 1000,
+      outOfSessionTimeout: 60 * 1000,
+      commitStrategy: { CommitEveryNDeltas: 20, CommitEveryNMs: 1000 * 30 },
+    })
     console.log("JOINED", this.session)
   }
 

@@ -3,10 +3,10 @@
   import ControllerBoard from './ControllerBoard.svelte'
   import ControllerCreate from './ControllerCreate.svelte'
   import ControllerBlockActiveBoards from './ControllerBlockActiveBoards.svelte'
-  import { AppAgentWebsocket, AdminWebsocket } from '@holochain/client';
+  import { AppWebsocket, AdminWebsocket } from '@holochain/client';
   import '@shoelace-style/shoelace/dist/themes/light.css';
   import 'highlight.js/styles/github.css';
-  import { WeClient, isWeContext, initializeHotReload, type WAL } from '@lightningrodlabs/we-applet';
+  import { WeaveClient as WeaveClient, isWeaveContext, initializeHotReload, type WAL } from '@theweave/api';
   import { ProfilesClient, ProfilesStore } from '@holochain-open-dev/profiles';
   import "@holochain-open-dev/profiles/dist/elements/profiles-context.js";
   import "@holochain-open-dev/profiles/dist/elements/profile-prompt.js";
@@ -20,8 +20,8 @@
   const adminPort = import.meta.env.VITE_ADMIN_PORT
   const url = `ws://localhost:${appPort}`;
 
-  let client: AppAgentWebsocket
-  let weClient: WeClient
+  let client: AppWebsocket
+  let weClient: WeaveClient
   let profilesStore : ProfilesStore|undefined = undefined
 
   let connected = false
@@ -49,22 +49,31 @@
         console.warn("Could not initialize applet hot-reloading. This is only expected to work in a We context in dev mode.")
       }
     }
-    if (!isWeContext()) {
+    if (!isWeaveContext()) {
         console.log("adminPort is", adminPort)
+        let tokenResp;
         if (adminPort) {
-          const adminWebsocket = await AdminWebsocket.connect({ url: new URL(`ws://localhost:${adminPort}`) })
+          console.log("adminPort is", adminPort)
+          const adminWebsocket = await AdminWebsocket.connect({
+            url: new URL(`ws://localhost:${adminPort}`)
+          })
+          tokenResp = await adminWebsocket.issueAppAuthenticationToken({
+            installed_app_id: "notebooks",
+          });
           const x = await adminWebsocket.listApps({})
           console.log("apps", x)
           const cellIds = await adminWebsocket.listCellIds()
-          console.log("CELL IDS",cellIds)
+          console.log("CELL IDS", cellIds)
           await adminWebsocket.authorizeSigningCredentials(cellIds[0])
         }
         console.log("appPort and Id is", appPort, appId)
-        client = await AppAgentWebsocket.connect(appId, { url: new URL(url) })
+        let params = { url: new URL(url) };
+        if (tokenResp) params["token"] = tokenResp.token;
+        client = await AppWebsocket.connect(params);
         profilesClient = new ProfilesClient(client, appId);
     }
     else {
-      weClient = await WeClient.connect(appletServices);
+      weClient = await WeaveClient.connect(appletServices);
 
       switch (weClient.renderInfo.type) {
         case "applet-view":
@@ -82,30 +91,30 @@
               }
               break;
             case "asset":
-              switch (weClient.renderInfo.view.roleName) {
+              switch (weClient.renderInfo.view.recordInfo.roleName) {
                 case "slate":
-                  switch (weClient.renderInfo.view.integrityZomeName) {
+                  switch (weClient.renderInfo.view.recordInfo.integrityZomeName) {
                     case "syn_integrity":
-                      switch (weClient.renderInfo.view.entryType) {
+                      switch (weClient.renderInfo.view.recordInfo.entryType) {
                         case "document":
                           renderType = RenderType.Hrl
                           wal = weClient.renderInfo.view.wal
                           break;
                         default:
-                          throw new Error("Unknown entry type:"+weClient.renderInfo.view.entryType);
+                          throw new Error("Unknown entry type:"+weClient.renderInfo.view.recordInfo.entryType);
                       }
                       break;
                     default:
-                      throw new Error("Unknown integrity zome:"+weClient.renderInfo.view.integrityZomeName);
+                      throw new Error("Unknown integrity zome:"+weClient.renderInfo.view.recordInfo.integrityZomeName);
                   }
                   break;
                 default:
-                  throw new Error("Unknown role name:"+weClient.renderInfo.view.roleName);
+                  throw new Error("Unknown role name:"+weClient.renderInfo.view.recordInfo.roleName);
               }
               break;
             case "creatable":
               switch (weClient.renderInfo.view.name) {
-                case "board":
+                case "Board":
                   renderType = RenderType.CreateBoard
                   createView = weClient.renderInfo.view
               }              
@@ -114,8 +123,8 @@
               throw new Error("Unsupported applet-view type");
           }
           break;
-        case "cross-applet-view":
-          switch (this.weClient.renderInfo.view.type) {
+        case "cross-group-view":
+          switch (this.weaveClient.renderInfo.view.type) {
             case "main":
               // here comes your rendering logic for the cross-applet main view
               //break;

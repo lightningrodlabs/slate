@@ -2,7 +2,7 @@
   import "@shoelace-style/shoelace/dist/components/skeleton/skeleton.js";
   import { createEventDispatcher, getContext } from "svelte";
   import type { SlateStore } from "./store";
-  import { weaveUrlToWAL } from "@lightningrodlabs/we-applet";
+  import { weaveUrlToWAL } from "@theweave/api";
   import { hrlToString } from "@holochain-open-dev/utils";
   import { appletOrigin, type WALUrl } from "./util";
 
@@ -22,7 +22,7 @@
       class:attachment-item-with-delete={allowDelete}
       class:attachment-item={!allowDelete}
     >
-      {#await store.weClient.assetInfo(wal)}
+      {#await store.weaveClient.assetInfo(wal)}
         <div style="cursor:pointer; padding: 0 5px 0 5px; border: dashed 1px;margin-right:5px" title={`Resolving WAL: ${hrlToString(wal.hrl)}?${JSON.stringify(wal.context)}`}> ...</div>
       {:then data}
         {#if data}
@@ -32,7 +32,7 @@
                 e.stopPropagation()
                 try {
   //                embedLink = index
-                  await store.weClient.openWal(wal);
+                  await store.weaveClient.openWal(wal);
                   await navigator.clipboard.writeText(appletOrigin(data.appletHash) + "?view=applet-view&view-type=asset&hrl=" + hrlToString(wal.hrl));
                 } catch(e) {
                   alert(`Error opening link: ${e}`)

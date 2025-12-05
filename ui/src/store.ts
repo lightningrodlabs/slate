@@ -1,5 +1,5 @@
 import {
-  type AppAgentClient,
+  type AppClient,
   type EntryHash,
   type AgentPubKeyB64,
   type AppAgentCallZomeRequest,
@@ -17,7 +17,7 @@ import en from 'javascript-time-ago/locale/en'
 import { writable, type Unsubscriber, type Writable } from "svelte/store";
 import type { ProfilesStore } from '@holochain-open-dev/profiles';
 import type { BoardState } from './board';
-import type { WeClient } from '@lightningrodlabs/we-applet';
+import type { WeaveClient } from '@theweave/api';
 import { HoloHashMap } from '@holochain-open-dev/utils';
 import { getMyDna } from './util';
 
@@ -27,7 +27,7 @@ TimeAgo.addDefaultLocale(en)
 const ZOME_NAME = 'syn'
 
 export class SlateService {
-  constructor(public client: AppAgentClient, public roleName, public zomeName = ZOME_NAME) {}
+  constructor(public client: AppClient, public roleName, public zomeName = ZOME_NAME) {}
 
   private callZome(fnName: string, payload: any) {
     const req: AppAgentCallZomeRequest = {
@@ -57,15 +57,15 @@ export class SlateStore {
   boardList: BoardList;
   updating = false
   synStore: SynStore;
-  client: AppAgentClient;
+  client: AppClient;
   uiProps: Writable<UIProps>
   unsub: Unsubscriber
   dnaHash: DnaHash
 
   constructor(
-    public weClient : WeClient,
+    public weaveClient : WeaveClient,
     public profilesStore: ProfilesStore,
-    protected clientIn: AppAgentClient,
+    protected clientIn: AppClient,
     protected roleName: RoleName,
     protected zomeName: string = ZOME_NAME
   ) {

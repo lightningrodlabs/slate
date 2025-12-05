@@ -9,7 +9,7 @@
     import LogoIcon from "./icons/LogoIcon.svelte";
     import BoardMenuItem from "./BoardMenuItem.svelte";
     import { BoardType } from "./boardList";
-  import { isWeContext } from "@lightningrodlabs/we-applet";
+  import { isWeaveContext } from "@theweave/api";
     export let wide = false
 
     let newBoardDialog
@@ -44,7 +44,7 @@
 <div class="board-menu"
     class:wide={wide} >
 
-    {#if !isWeContext()}
+    {#if !isWeaveContext()}
         <GroupParticipants/>
     {/if}
         <h3 class="type-header">Canvases</h3>

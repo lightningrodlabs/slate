@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { isWeContext, type WAL, weaveUrlFromWal } from "@lightningrodlabs/we-applet";
+  import { isWeaveContext, type WAL, weaveUrlFromWal } from "@theweave/api";
   import { cloneDeep } from "lodash";
   import type { Board } from "./board";
   import { getContext } from "svelte";
@@ -38,7 +38,7 @@
   }
 
   const addAttachment = async () => {
-    const wal = await store.weClient.userSelectWal()
+    const wal = await store.weaveClient.userSelectWal()
     if (wal) {
       _addAttachment(wal)
     }
@@ -68,7 +68,7 @@
 </script>
 
 <sl-dialog label={"Board Links"} bind:this={dialog}>
-  {#if isWeContext()}
+  {#if isWeaveContext()}
     <AttachmentsList attachments={attachments} on:remove-attachment={(e)=>removeAttachment(e.detail)}/>
 
     <div>
