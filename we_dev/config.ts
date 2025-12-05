@@ -66,7 +66,7 @@ export default defineConfig({
       description: 'draw_it it!',
       icon: {
         type: 'filesystem',
-        path: './we_dev/icon.svg',
+        path: './we_dev/icon.png',
       },
       source: {
         type: 'localhost',
