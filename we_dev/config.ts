@@ -1,6 +1,12 @@
-import { defineConfig } from '@lightningrodlabs/we-dev-cli';
+import { defineConfig } from '@theweave/cli';
 
 export default defineConfig({
+  toolCurations: [
+    {
+      url: 'https://raw.githubusercontent.com/lightningrodlabs/weave-tool-curation/refs/heads/test-0.15/0.15/lists/curations-0.15.json',
+      useLists: ['default'],
+    },
+  ],
   groups: [
     {
       name: 'Lightning Rod Labs',
@@ -38,18 +44,18 @@ export default defineConfig({
           registeringAgent: 1,
           joiningAgents: [2],
         },
-        {
-          name: 'kando',
-          instanceName: 'kando',
-          registeringAgent: 1,
-          joiningAgents: [2],
-        },
-        {
-          name: 'notebooks',
-          instanceName: 'notebooks',
-          registeringAgent: 1,
-          joiningAgents: [2],
-        },
+        // {
+        //   name: 'kando',
+        //   instanceName: 'kando',
+        //   registeringAgent: 1,
+        //   joiningAgents: [2],
+        // },
+        // {
+        //   name: 'notebooks',
+        //   instanceName: 'notebooks',
+        //   registeringAgent: 1,
+        //   joiningAgents: [2],
+        // },
       ],
     },
   ],
@@ -60,7 +66,7 @@ export default defineConfig({
       description: 'draw_it it!',
       icon: {
         type: 'filesystem',
-        path: './we_dev/icon.svg',
+        path: './we_dev/icon.png',
       },
       source: {
         type: 'localhost',
@@ -68,31 +74,31 @@ export default defineConfig({
         uiPort: 8888,
       },
     },
-    {
-        name: 'kando',
-        subtitle: 'kanban boards',
-        description: 'Real-time kanban boards based on syn',
-        icon: {
-          type: "https",
-          url: "https://raw.githubusercontent.com/holochain-apps/kando/main/we_dev/kando_icon.png"
-        },
-        source: {
-          type: "https",
-          url: "https://github.com/holochain-apps/kando/releases/download/v0.9.8/kando.webhapp"
-        },
-      },
-      {
-      name: 'notebooks',
-      subtitle: 'Collaborative note taking',
-      description: 'Real-time notetaking based on syn',
-      icon: {
-        type: 'https',
-        url: 'https://lightningrodlabs.org/projects/notebooks_logo.svg',
-      },
-      source: {
-        type: 'https',
-        url: 'https://github.com/lightningrodlabs/notebooks/releases/download/v0.2.10/notebooks.webhapp',
-      },
-    },
+    // {
+    //     name: 'kando',
+    //     subtitle: 'kanban boards',
+    //     description: 'Real-time kanban boards based on syn',
+    //     icon: {
+    //       type: "https",
+    //       url: "https://raw.githubusercontent.com/holochain-apps/kando/main/we_dev/kando_icon.png"
+    //     },
+    //     source: {
+    //       type: "https",
+    //       url: "https://github.com/holochain-apps/kando/releases/download/v0.9.8/kando.webhapp"
+    //     },
+    //   },
+    //   {
+    //   name: 'notebooks',
+    //   subtitle: 'Collaborative note taking',
+    //   description: 'Real-time notetaking based on syn',
+    //   icon: {
+    //     type: 'https',
+    //     url: 'https://lightningrodlabs.org/projects/notebooks_logo.svg',
+    //   },
+    //   source: {
+    //     type: 'https',
+    //     url: 'https://github.com/lightningrodlabs/notebooks/releases/download/v0.2.10/notebooks.webhapp',
+    //   },
+    // },
   ],
 });

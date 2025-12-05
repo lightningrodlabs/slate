@@ -2,14 +2,14 @@
     import SlatePane from './SlatePane.svelte'
     import { SlateStore } from './store'
     import { setContext } from 'svelte';
-    import type { AppAgentClient, EntryHash } from '@holochain/client';
+    import type { AppClient, EntryHash } from '@holochain/client';
     import type { SynStore } from '@holochain-syn/store';
     import type { ProfilesStore } from "@holochain-open-dev/profiles";
-    import type { WeClient } from '@lightningrodlabs/we-applet';
+    import type { WeaveClient } from '@theweave/api';
 
     export let roleName = ""
-    export let client : AppAgentClient
-    export let weClient : WeClient
+    export let client : AppClient
+    export let weClient : WeaveClient
     export let profilesStore : ProfilesStore
     export let board : EntryHash
 

@@ -1,5 +1,5 @@
-import {type AppAgentClient, type EntryHash, type DnaHash, CellType, encodeHashToBase64, type HoloHashB64 } from "@holochain/client";
-import type { AppletHash } from '@lightningrodlabs/we-applet';
+import {type AppClient, type EntryHash, type DnaHash, CellType, encodeHashToBase64, type HoloHashB64 } from "@holochain/client";
+import type { AppletHash } from '@theweave/api';
 
 export function onVisible(element, callback) {
     new IntersectionObserver((entries, observer) => {
@@ -23,11 +23,9 @@ export const hashEqual = (a:EntryHash, b:EntryHash) : boolean => {
   return true;
 }
 
-export const getMyDna = async (role:string, client: AppAgentClient) : Promise<DnaHash>  => {
+export const getMyDna = async (role:string, client: AppClient) : Promise<DnaHash>  => {
   const appInfo = await client.appInfo();
-  const dnaHash = (appInfo.cell_info[role][0] as any)[
-    CellType.Provisioned
-  ].cell_id[0];
+  const dnaHash = (appInfo.cell_info[role][0] as any).value.cell_id[0];
   return dnaHash
 }
 

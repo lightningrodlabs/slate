@@ -21,7 +21,7 @@
   import { Excalidraw, getSceneVersion } from "@excalidraw/excalidraw";
   import ReactAdapter from "./ReactAdapter.svelte";
   import AboutDialog from "./AboutDialog.svelte";
-  import type { WAL } from "@lightningrodlabs/we-applet";
+  import type { WAL } from "@theweave/api";
 
   const { getStore } :any = getContext("store");
   let store: SlateStore = getStore();
@@ -111,7 +111,7 @@
 
   const walToPocket = () => {
     const attachment: WAL = { hrl: [store.dnaHash, activeBoard.hash], context: "" }
-    store.weClient?.walToPocket(attachment)
+    store.weaveClient?.assets?.assetToPocket(attachment)
   }
 
   const updateExcalidrawState = throttle((excalidrawElements, excalidrawAppState, excalidrawFiles) => {
@@ -162,7 +162,7 @@
             </sl-menu-item>
           </sl-menu>
         </sl-dropdown>
-        {#if store.weClient}
+        {#if store.weaveClient}
           <AttachmentsDialog activeBoard={activeBoard} bind:this={attachmentsDialog}></AttachmentsDialog>
           {#if $state.boundTo.length>0}
             <div style="margin-left:10px;display:flex; align-items: center">
@@ -190,8 +190,6 @@
       {#if $participants}
         <div class="participants">
           <div style="display:flex; flex-direction: row">
-            <Avatar agentPubKey={store.myAgentPubKey} showNickname={false} size={30} />
-
             {#each Array.from($participants.entries()) as [agentPubKey, sessionData]}
             <div class:idle={Date.now()-sessionData.lastSeen >30000}>
               <Avatar agentPubKey={agentPubKey} showNickname={false} size={30} />

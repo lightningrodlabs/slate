@@ -1,31 +1,30 @@
 ---
-manifest_version: "1"
+manifest_version: "0"
 name: slate
 
 integrity:
   network_seed: ~
   properties:
     type: "Slate"
-  origin_time: 2023-11-03T00:00:00.0Z
   zomes:
     - name: syn_integrity
-      bundled: ../../../target/wasm32-unknown-unknown/release/syn_integrity.wasm
+      path: ../../../target/wasm32-unknown-unknown/release/syn_integrity.wasm
     - name: profiles_integrity
-      bundled: ../../../target/wasm32-unknown-unknown/release/profiles_integrity.wasm
+      path: ../../../target/wasm32-unknown-unknown/release/profiles_integrity.wasm
     - name: file_storage_integrity
-      bundled: ../../../target/wasm32-unknown-unknown/release/file_storage_integrity.wasm
+      path: ../../../target/wasm32-unknown-unknown/release/file_storage_integrity.wasm
 
 coordinator:
   zomes:
     - name: syn
-      bundled: ../../../target/wasm32-unknown-unknown/release/syn.wasm
+      path: ../../../target/wasm32-unknown-unknown/release/syn.wasm
       dependencies:
         - name: syn_integrity
     - name: profiles
-      bundled: ../../../target/wasm32-unknown-unknown/release/profiles.wasm
+      path: ../../../target/wasm32-unknown-unknown/release/profiles.wasm
       dependencies:
         - name: profiles_integrity
     - name: file_storage
-      bundled: ../../../target/wasm32-unknown-unknown/release/file_storage.wasm
+      path: ../../../target/wasm32-unknown-unknown/release/file_storage.wasm
       dependencies:
         - name: file_storage_integrity
