@@ -1,35 +1,34 @@
 <script lang="ts">
-  import { isWeaveContext, type WAL, weaveUrlFromWal } from "@theweave/api";
+  import { type WAL, isWeaveContext, weaveUrlFromWal } from "@theweave/api";
   import { cloneDeep } from "lodash";
-  import type { Board } from "./board";
+  import type { Board, Sticky } from "./board";
   import { getContext } from "svelte";
-  import type { SlateStore } from "./store";
+  import type { TalkingStickiesStore } from "./store";
+  import type { WALUrl} from "./util";
   import '@shoelace-style/shoelace/dist/components/button/button.js';
   import '@shoelace-style/shoelace/dist/components/dialog/dialog.js';
   import AttachmentsList from "./AttachmentsList.svelte";
   import SvgIcon from "./SvgIcon.svelte";
-  import type { WALUrl } from "./util";
 
   const { getStore } :any = getContext("store");
-  let store: SlateStore = getStore();
-  //let card: Card | undefined
+  let store: TalkingStickiesStore = getStore();
+  let sticky: Sticky | undefined
   let attachments: Array<WALUrl> = []
-
+ 
   $:attachments = attachments
 
   export let activeBoard: Board
   export const close=()=>{dialog.hide()}
-  export const open= async (c: any)=>{
-    // card = c
-    // if (card) {
-    //   attachments = card.props.attachments ? cloneDeep(card.props.attachments): []
-    // } else {
+  export const open= async (c: Sticky)=>{
+    sticky = c
+    if (sticky) {
+      attachments = sticky.props.attachments ? cloneDeep(sticky.props.attachments): []
+    } else {
       attachments = activeBoard.state().props.attachments
-    // }
+    }
     dialog.show()
   }
   let dialog
-  $: attachments
 
   function removeAttachment(index: number) {
     attachments.splice(index, 1);
@@ -38,9 +37,9 @@
   }
 
   const addAttachment = async () => {
-    const wal = await store.weaveClient.userSelectWal()
-    if (wal) {
-      _addAttachment(wal)
+    const hrl = await store.weaveClient.assets.userSelectAsset()
+    if (hrl) {
+      _addAttachment(hrl)
     }
   }
 
@@ -51,33 +50,33 @@
   }
 
   const handleSave = async () => {
-    // if (card) {
-    //   const props = cloneDeep(card.props)
-    //   props.attachments = cloneDeep(attachments)
-    //   activeBoard.requestChanges([{
-    //     type: 'update-card-props',
-    //     id: card.id,
-    //     props
-    //   }])
-    // } else {
+    if (sticky) {
+      const props = cloneDeep(sticky.props)
+      props.attachments = cloneDeep(attachments)
+      activeBoard.requestChanges([{
+        type: 'update-sticky-props', 
+        id: sticky.id,
+        props
+      }])
+    } else {
       const props = cloneDeep(activeBoard.state().props)
       props.attachments = cloneDeep(attachments)
       activeBoard.requestChanges([{type: 'set-props', props }])
-    // }
+    }
   }
 </script>
 
-<sl-dialog label={"Board Links"} bind:this={dialog}>
+<sl-dialog label={sticky? "Sticky Links":"Board Links"} bind:this={dialog}>
   {#if isWeaveContext()}
-    <AttachmentsList attachments={attachments} on:remove-attachment={(e)=>removeAttachment(e.detail)}/>
+  <AttachmentsList attachments={attachments}
+      on:remove-attachment={(e)=>removeAttachment(e.detail)}/>
 
-    <div>
-      <h3>Search Linkables:</h3>
-    </div>
-
-    <sl-button style="margin-top:5px;margin-right: 5px" circle on:click={()=>addAttachment()}>
-      <SvgIcon icon=searchPlus size=30 />
-    </sl-button>
+  <div style="">
+      <h3>Search Linkables:</h3> 
+      <sl-button style="margin-top:5px;margin-right: 5px" circle on:click={()=>addAttachment()} >
+        <SvgIcon icon=searchPlus size=30 />
+  </sl-button>
+  </div> 
   {/if}
 </sl-dialog>
 

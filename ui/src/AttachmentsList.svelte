@@ -1,10 +1,11 @@
 <script lang="ts">
   import "@shoelace-style/shoelace/dist/components/skeleton/skeleton.js";
   import { createEventDispatcher, getContext } from "svelte";
-  import type { SlateStore } from "./store";
+  import type { TalkingStickiesStore } from "./store";
+  import type {  WALUrl } from "./util";
   import { weaveUrlToWAL } from "@theweave/api";
+  import SvgIcon from "./SvgIcon.svelte";
   import { hrlToString } from "@holochain-open-dev/utils";
-  import { appletOrigin, type WALUrl } from "./util";
 
   const dispatch = createEventDispatcher()
 
@@ -12,17 +13,17 @@
   export let allowDelete = true
 
   const { getStore } :any = getContext("store");
-  let store: SlateStore = getStore();
+  let store: TalkingStickiesStore = getStore();
+  
 </script>
-
 <div class="attachments-list">
   {#each attachments as attachment, index}
     {@const wal = weaveUrlToWAL(attachment)}
-    <div
+    <div 
       class:attachment-item-with-delete={allowDelete}
       class:attachment-item={!allowDelete}
     >
-      {#await store.weaveClient.assetInfo(wal)}
+      {#await store.weaveClient.assets.assetInfo(wal)}
         <div style="cursor:pointer; padding: 0 5px 0 5px; border: dashed 1px;margin-right:5px" title={`Resolving WAL: ${hrlToString(wal.hrl)}?${JSON.stringify(wal.context)}`}> ...</div>
       {:then data}
         {#if data}
@@ -31,9 +32,7 @@
             on:click={async (e)=>{
                 e.stopPropagation()
                 try {
-  //                embedLink = index
-                  await store.weaveClient.openWal(wal);
-                  await navigator.clipboard.writeText(appletOrigin(data.appletHash) + "?view=applet-view&view-type=asset&hrl=" + hrlToString(wal.hrl));
+                  await store.weaveClient.openAsset(wal)
                 } catch(e) {
                   alert(`Error opening link: ${e}`)
                 }
@@ -41,13 +40,23 @@
             style="display:flex;flex-direction:row;margin-right:5px"><sl-icon src={assetInfo.icon_src} slot="prefix"></sl-icon>
             {assetInfo.name}
           </sl-button>
-        {:else}
-          <div style="color:red; cursor:pointer; padding: 0 5px 0 5px; border: dashed 1px;margin-right:5px" title={`Failed to resolve WAL: ${hrlToString(wal.hrl)}?${JSON.stringify(wal.context)}`}>Bad WAL</div>
+        {:else} 
+        <div style="color:red; cursor:pointer; padding: 0 5px 0 5px; border: dashed 1px;margin-right:5px" title={`Failed to resolve WAL: ${hrlToString(wal.hrl)}?${JSON.stringify(wal.context)}`}>Bad WAL</div>
+
         {/if}
       {:catch error}
         <div style="color:red">Error getting asset info: {error}</div>
       {/await}
-    </div>
+      {#if allowDelete}
+        <sl-button size="small"
+          on:click={()=>{
+            dispatch("remove-attachment",index)
+          }}
+        >
+          <SvgIcon icon=faTrash size=12 />
+        </sl-button>
+      {/if}
+</div>
   {/each}
 </div>
 <style>
@@ -55,12 +64,13 @@
     display:flex;
     flex-direction:row;
     flex-wrap: wrap;
+    align-items: center;
   }
   .attachment-item {
   }
   .attachment-item-with-delete {
-    border:1px solid #aaa;
-    background-color:rgba(0,255,0,.1);
+    border:1px solid #aaa; 
+    background-color:rgba(0,255,0,.1); 
     padding:4px;
     display:flex;
     margin-right:4px;
