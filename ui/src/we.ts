@@ -51,7 +51,7 @@ export const appletServices: AppletServices = {
         if (entryType == "document") {
           const synClient = new SynClient(appletClient, roleName, ZOME_NAME);
           console.log("Getting asset info for document WAL:", wal)
-          const synStore = new SynStore(synClient);
+          const synStore = new SynStore(synClient, true);
           console.log("SynStore:", synStore)
           const documentHash = wal.hrl[1]
           console.log("Document hash:", documentHash)
@@ -83,7 +83,7 @@ export const appletServices: AppletServices = {
       searchFilter: string
     ): Promise<Array<WAL>> => {
         const synClient = new SynClient(appletClient, ROLE_NAME, ZOME_NAME);
-        const synStore = new SynStore(synClient);
+        const synStore = new SynStore(synClient, true);
         const boardHashes = asyncDerived(synStore.documentsByTag.get(BoardType.active),x=>Array.from(x.keys()))
 
         const boardData = new LazyHoloHashMap( documentHash => {
