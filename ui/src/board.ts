@@ -64,7 +64,7 @@ export const boardGrammar = {
     return state
   },
 
-  applyDelta(
+  async applyDelta(
     delta: BoardDelta,
     state: BoardState,
     _ephemeralState: any,
@@ -183,11 +183,11 @@ export class Board {
     }
   }
 
-  requestChanges(deltas: Array<BoardDelta>) {
-    console.log("REQUESTING BOARD CHANGES: ", deltas)
-    this.session.change((state,_eph)=>{
+  async requestChanges(deltas: Array<BoardDelta>) {
+    console.log("REQUESTING BOARD CHANGES: ", deltas, deltas[0]?.["excalidrawElements"].length)
+    this.session.change(async (state,_eph)=>{
       for (const delta of deltas) {
-        boardGrammar.applyDelta(delta, state, _eph, undefined)
+        await boardGrammar.applyDelta(delta, state, _eph, undefined)
       }
     })
   }

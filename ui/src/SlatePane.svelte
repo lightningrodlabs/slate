@@ -33,11 +33,17 @@
   $: participants = activeBoard.participants()
   $: activeHashB64 = store.boardList.activeBoardHashB64;
   $: state = activeBoard.readableState()
+  $: session = activeBoard.session
+  $: status = session.sessionStatus
 
   let excalidrawAPI = null
+  let isUserActivelyEditing = false
+  let hasUnsavedChanges = false
 
   $: if ($state) {
-    if (excalidrawAPI) {
+    if (excalidrawAPI && !isUserActivelyEditing) {
+      // Only update the canvas from remote changes if the user is not actively editing
+      console.log('Remote changes detected, updating Excalidraw canvas...', isUserActivelyEditing, $state.excalidrawElements.length);
       // XXX: Need to do a cloneDeep here too otherwise resizing elements doesn't trigger
       //      updateExcalidrawState because it must be editing the $state.excalidrawElements directly and so the scene # is updated internally
       excalidrawAPI.updateScene({
@@ -114,16 +120,139 @@
     store.weaveClient?.assets?.assetToPocket(attachment)
   }
 
-  const updateExcalidrawState = throttle((excalidrawElements, excalidrawAppState, excalidrawFiles) => {
+  const checkIfUserIsActivelyEditing = (appState) => {
+    // Detect if user is actively creating, editing, or manipulating objects
+    const isEditing = (
+      appState.editingElement !== null ||           // Creating/drawing a new element
+      appState.resizingElement !== null ||          // Resizing an element
+      appState.editingLinearElement !== null ||     // Editing a line/arrow
+      appState.draggingElement !== null ||          // Dragging to create
+      appState.editingGroupId !== null ||           // Editing text or group
+      appState.isResizing === true ||               // Resizing state (check for true explicitly)
+      appState.isDragging === true                  // Dragging state (check for true explicitly)
+    )
+    return isEditing
+  }
+
+  const saveExcalidrawChanges = throttle(async (excalidrawElements, excalidrawAppState, excalidrawFiles) => {
     if (getSceneVersion($state.excalidrawElements) !== getSceneVersion(excalidrawElements)) {
-      activeBoard.requestChanges([{ type: 'set-excalidraw', excalidrawElements, excalidrawAppState }])
-      activeBoard.updateFiles(excalidrawFiles)
+      await activeBoard.requestChanges([{ type: 'set-excalidraw', excalidrawElements, excalidrawAppState }])
+      await activeBoard.updateFiles(excalidrawFiles)
+      // Check if user is still editing after save
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      isUserActivelyEditing = checkIfUserIsActivelyEditing(excalidrawAppState)
     }
   }, 3000, { 'leading': true })
+
+  const updateExcalidrawState = (excalidrawElements, excalidrawAppState, excalidrawFiles) => {
+    // Check editing state immediately (not throttled)
+    const currentlyEditing = checkIfUserIsActivelyEditing(excalidrawAppState)
+    
+    if (currentlyEditing) {
+      isUserActivelyEditing = true
+    }
+    
+    // Throttled save to Syn
+    saveExcalidrawChanges(excalidrawElements, excalidrawAppState, excalidrawFiles)
+  }
 
   const embedToolFrame = (element, state) => {
     return React.createElement('iframe', { src: element.link, style: { width: "100%", height: "100%", bgColor: "black"}})
   }
+
+  // Hidden feature: Ctrl click counter
+  let ctrlClickCount = 0
+  let showHiddenButton = false
+  let autoEditActive = false
+  let autoEditIntervalId: ReturnType<typeof setInterval> | null = null
+
+  const handleKeyDown = (event: KeyboardEvent) => {
+    if (event.key === 'Control' || event.key === 'Ctrl') {
+      ctrlClickCount++
+      if (ctrlClickCount >= 9) {
+        showHiddenButton = true
+      }
+      // Reset counter after 2 seconds of no Ctrl presses
+      setTimeout(() => {
+        ctrlClickCount = 0
+      }, 2000)
+    }
+  }
+
+  const autoEdit = async () => {
+    isUserActivelyEditing = true // Prevent remote updates during auto edit
+
+    // Use the Excalidraw API directly instead of simulating events
+    if (excalidrawAPI) {
+      console.log('Using Excalidraw API to create rectangle')
+      const id = uuidv1()
+      const centerX = 400 + (Math.random() - 0.5) * 600
+      const centerY = 400 + (Math.random() - 0.5) * 600
+      const width = 200
+      const height = 100
+      
+      const rectangle = {
+        id: id,
+        type: 'rectangle',
+        x: centerX - width / 2,
+        y: centerY - height / 2,
+        width: width,
+        height: height,
+        angle: 0,
+        strokeColor: '#000000',
+        backgroundColor: 'transparent',
+        fillStyle: 'hachure',
+        strokeWidth: 1,
+        strokeStyle: 'solid',
+        roughness: 1,
+        opacity: 100,
+        groupIds: [],
+        roundness: { type: 3 },
+        seed: Math.floor(Math.random() * 100000),
+        version: 1,
+        versionNonce: Math.floor(Math.random() * 100000),
+        isDeleted: false,
+        boundElements: null,
+        updated: Date.now(),
+        link: null,
+        locked: false,
+      }
+      
+      const currentElements = excalidrawAPI.getSceneElements()
+      excalidrawAPI.updateScene({
+        elements: [...currentElements, rectangle]
+      })
+      console.log('Rectangle created via API:', rectangle)
+    } else {
+      console.error('Excalidraw API not available')
+    }
+  }
+
+  const toggleAutoEdit = () => {
+    autoEditActive = !autoEditActive
+    if (autoEditActive) {
+      // Start the loop
+      autoEditIntervalId = setInterval(() => {
+        autoEdit()
+      }, 5000) // Run every 2 seconds
+    } else {
+      // Stop the loop
+      if (autoEditIntervalId !== null) {
+        clearInterval(autoEditIntervalId)
+        autoEditIntervalId = null
+      }
+    }
+  }
+
+  onMount(() => {
+    window.addEventListener('keydown', handleKeyDown)
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+      if (autoEditIntervalId !== null) {
+        clearInterval(autoEditIntervalId)
+      }
+    }
+  })
 
 </script>
 <div class="board" >
@@ -187,6 +316,17 @@
       {/if}
     </div>
     <div class="right-items">
+      {#if showHiddenButton}
+        <button 
+          class="hidden-auto-edit-button {autoEditActive ? 'active' : ''}" 
+          on:click={toggleAutoEdit}
+          title={autoEditActive ? 'Stop Auto Edit' : 'Start Auto Edit'}
+        >
+          {autoEditActive ? '⏹' : '▶'}
+        </button>
+        ({isUserActivelyEditing ? 'Editing' : 'Saved'})
+        ({$status.code})
+      {/if}
       {#if $participants}
         <div class="participants">
           <div style="display:flex; flex-direction: row">
@@ -426,6 +566,41 @@
 
   .idle {
     opacity: 0.5;
+  }
+
+  .hidden-auto-edit-button {
+    width: 40px;
+    height: 40px;
+    margin-right: 10px;
+    border-radius: 50%;
+    border: 2px solid rgba(86, 92, 108, 0.5);
+    background-color: rgba(255, 255, 255, 0.9);
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .hidden-auto-edit-button:hover {
+    transform: scale(1.1);
+    border-color: rgba(86, 92, 108, 0.8);
+  }
+
+  .hidden-auto-edit-button.active {
+    background-color: rgba(255, 100, 100, 0.9);
+    border-color: rgba(200, 50, 50, 0.8);
+    animation: pulse 1s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.7;
+    }
   }
 
 
