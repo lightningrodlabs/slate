@@ -34,7 +34,7 @@
   $: activeHashB64 = store.boardList.activeBoardHashB64;
   $: state = activeBoard.readableState()
   $: session = activeBoard.session
-  $: status = session.sessionStatus
+  $: sessionStatus = session.sessionStatus
 
   let excalidrawAPI = null
   let isUserActivelyEditing = false
@@ -139,7 +139,6 @@
       await activeBoard.requestChanges([{ type: 'set-excalidraw', excalidrawElements, excalidrawAppState }])
       await activeBoard.updateFiles(excalidrawFiles)
       // Check if user is still editing after save
-      await new Promise(resolve => setTimeout(resolve, 1000))
       isUserActivelyEditing = checkIfUserIsActivelyEditing(excalidrawAppState)
     }
   }, 3000, { 'leading': true })
@@ -228,6 +227,16 @@
     }
   }
 
+  function getTimeAgo(stringDate: string, _currentTime?: number) {
+    try {
+      const timeAgo = store.timeAgo;
+      const date = new Date(`${stringDate}`);
+      return timeAgo.format(date);
+    } catch (e) {
+      return "";
+    }
+  }
+
   const toggleAutoEdit = () => {
     autoEditActive = !autoEditActive
     if (autoEditActive) {
@@ -273,7 +282,7 @@
           <SvgIcon icon=faClose size="16px"/>
         </sl-button>
         <sl-dropdown class="board-options board-menu" skidding=15>
-          <sl-button slot="trigger"   class="board-button settings" caret>{$state.name}</sl-button>
+          <sl-button slot="trigger" class="board-button settings" caret>{$state.name}</sl-button>
           <sl-menu className="settings-menu">
             <sl-menu-item on:click={()=> editBoardDialog.open(cloneDeep(activeBoard.hash))} class="board-settings" >
                 <SvgIcon icon="faCog"  style="background: transparent; opacity: .5; position: relative; top: -2px;" size="14px"/> <span>Settings</span>
@@ -325,8 +334,24 @@
           {autoEditActive ? '⏹' : '▶'}
         </button>
         ({isUserActivelyEditing ? 'Editing' : 'Saved'})
-        ({$status.code})
       {/if}
+
+      <span 
+        style="display: flex; margin-right:10px; cursor: pointer"
+        class={$sessionStatus.code == "syncing" ? "spinning" : ""}
+        title={$sessionStatus.code == "error" ? $sessionStatus.error : ($sessionStatus.code == "syncing" ? "syncing..." : "Last save " + getTimeAgo($sessionStatus.lastSave))}
+      >
+
+        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" 
+          fill={$sessionStatus.code == "ok" ? "#2de273ff" : $sessionStatus.code == "error" ? "#df3c1f" : "#f09928"}
+        >
+        <path d="M160-160v-80h110l-16-14q-52-46-73-105t-21-119q0-111 66.5-197.5T400-790v84q-72 26-116 88.5T240-478q0 45 17 87.5t53 78.5l10 10v-98h80v240H160Zm400-10v-84q72-26 116-88.5T720-482q0-45-17-87.5T650-648l-10-10v98h-80v-240h240v80H690l16 14q49 49 71.5 106.5T800-482q0 111-66.5 197.5T560-170Z"/>
+        </svg>
+
+        <span style="color: #df3c1f;">
+          {$sessionStatus.code == "error" ? `error syncing` : ""}
+        </span>
+      </span>
       {#if $participants}
         <div class="participants">
           <div style="display:flex; flex-direction: row">

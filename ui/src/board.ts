@@ -84,9 +84,17 @@ export const boardGrammar = {
         break;
       case "set-excalidraw":
         // For some reason the customData key is set to undefined which breaks in syn code getValueDescription
-        const newExcalidrawElements = cloneDeep(delta.excalidrawElements).map(e => pickBy(e, (v, k) => typeof(v) !== "undefined"))
-        state.excalidrawElements = newExcalidrawElements
-        // state.excalidrawAppState = delta.excalidrawAppState
+        const newElementsToAdd = delta.excalidrawElements.filter(de => !state.excalidrawElements.find(se => se.id === de.id)).map(e => pickBy(e, (v, k) => typeof(v) !== "undefined"))
+        const newElementsToUpdate = delta.excalidrawElements.filter(de => state.excalidrawElements.find(se => se.id === de.id)).map(e => pickBy(e, (v, k) => typeof(v) !== "undefined"))
+        // Add new elements
+        state.excalidrawElements.push(...newElementsToAdd)
+        // Update existing elements
+        for (const updatedElement of newElementsToUpdate) {
+          const index = state.excalidrawElements.findIndex(e => e.id === updatedElement.id)
+          if (index !== -1) {
+            state.excalidrawElements[index] = cloneDeep(updatedElement)
+          }
+        }
         break;
       case "set-excalidraw-files":
         console.log("set-excalidraw-files = ", delta.fileHashes)
@@ -222,7 +230,7 @@ export class Board {
   }
 
   async commitChanges() {
-    this.session.commitChanges()
+    await this.session.commitChanges()
   }
 
 }

@@ -141,6 +141,9 @@ export class BoardList {
                 const board = await this.getBoard(hash)
                 if (board) await board.leave()
                 else console.log("Board Not Found!")
+            } else {
+                const board = await this.getBoard(hash)
+                await board.commitChanges()
             }
             this.setActiveBoard(undefined)
         }
