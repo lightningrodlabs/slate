@@ -135,13 +135,14 @@
   }
 
   const saveExcalidrawChanges = throttle(async (excalidrawElements, excalidrawAppState, excalidrawFiles) => {
+    // console.log('Throttled saveExcalidrawChanges called', getSceneVersion($state.excalidrawElements), getSceneVersion(excalidrawElements));
     if (getSceneVersion($state.excalidrawElements) !== getSceneVersion(excalidrawElements)) {
       await activeBoard.requestChanges([{ type: 'set-excalidraw', excalidrawElements, excalidrawAppState }])
       await activeBoard.updateFiles(excalidrawFiles)
       // Check if user is still editing after save
       isUserActivelyEditing = checkIfUserIsActivelyEditing(excalidrawAppState)
     }
-  }, 3000, { 'leading': true })
+  }, 3000, { 'leading': true, 'trailing': true })
 
   const updateExcalidrawState = (excalidrawElements, excalidrawAppState, excalidrawFiles) => {
     // Check editing state immediately (not throttled)
@@ -149,10 +150,11 @@
     
     if (currentlyEditing) {
       isUserActivelyEditing = true
+    } else if (isUserActivelyEditing) {
+      // Throttled save to Syn
+      saveExcalidrawChanges(excalidrawElements, excalidrawAppState, excalidrawFiles)
     }
     
-    // Throttled save to Syn
-    saveExcalidrawChanges(excalidrawElements, excalidrawAppState, excalidrawFiles)
   }
 
   const embedToolFrame = (element, state) => {
