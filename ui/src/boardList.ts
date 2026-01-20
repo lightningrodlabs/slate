@@ -143,7 +143,7 @@ export class BoardList {
                 else console.log("Board Not Found!")
             } else {
                 const board = await this.getBoard(hash)
-                await board.commitChanges()
+                board.commitChanges()
             }
             this.setActiveBoard(undefined)
         }

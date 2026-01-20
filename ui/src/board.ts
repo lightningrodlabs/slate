@@ -8,6 +8,7 @@ import type { WAL } from "@theweave/api";
 import { BoardType } from "./boardList";
 import type { AppState, ExcalidrawElement, BinaryFiles } from "@excalidraw/excalidraw/types";
 import { dataURItoBlob, type WALUrl } from "./util";
+import isEqual from 'lodash-es/isEqual.js';
 
 export type BoardProps = {
   bgUrl: string,
@@ -83,9 +84,23 @@ export const boardGrammar = {
         state.props = delta.props
         break;
       case "set-excalidraw":
-        // For some reason the customData key is set to undefined which breaks in syn code getValueDescription
-        const newElementsToAdd = delta.excalidrawElements.filter(de => !state.excalidrawElements.find(se => se.id === de.id)).map(e => pickBy(e, (v, k) => typeof(v) !== "undefined"))
-        const newElementsToUpdate = delta.excalidrawElements.filter(de => state.excalidrawElements.find(se => se.id === de.id)).map(e => pickBy(e, (v, k) => typeof(v) !== "undefined"))
+        // For some reason the customData key is set to undefined which breaks in syn code getValueDescription`
+        // Convert Automerge array and objects to regular JavaScript objects for processing
+        const currentElements = JSON.parse(JSON.stringify(state.excalidrawElements))
+        // console.log("Current excalidraw elements: ", currentElements, " Incoming elements: ", delta.excalidrawElements)
+        const newElementsToAdd = delta.excalidrawElements
+          .filter(de => !currentElements.find(se => se.id === de.id))
+          .map(e => pickBy(e, (v, k) => typeof(v) !== "undefined"))
+        // const newElementsToUpdate = delta.excalidrawElements.filter(de => currentElements.find(se => se.id === de.id)).map(e => pickBy(e, (v, k) => typeof(v) !== "undefined"))
+        const retainedItems = delta.excalidrawElements.filter(de => currentElements.find(se => se.id === de.id))
+        const itemsToUpdate = retainedItems.filter(de => {
+          const currentItem = currentElements.find(se => se.id === de.id)
+          return isEqual(currentItem, de) === false
+        })
+        const newElementsToUpdate = itemsToUpdate.map(e => pickBy(e, (v, k) => typeof(v) !== "undefined"))
+
+        console.log("Updating excalidraw elements. To add: ", newElementsToAdd.length, " To update: ", newElementsToUpdate.length)
+
         // Add new elements
         state.excalidrawElements.push(...newElementsToAdd)
         // Update existing elements
