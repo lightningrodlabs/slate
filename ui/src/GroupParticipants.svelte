@@ -5,10 +5,9 @@
   import type { SlateStore } from "./store";
   import Avatar from './Avatar.svelte';
   import "@holochain-open-dev/stores/dist/debug-store.js"
-  import { encodeHashToBase64, type AgentPubKey } from "@holochain/client";
+  import { encodeHashToBase64, type AgentPubKey, HoloHashMap, LazyHoloHashMap } from "@holochain/client";
   import {type AsyncReadable, pipe, joinAsync, asyncDerived, sliceAndJoin} from '@holochain-open-dev/stores'
   import type { BoardAndLatestState } from "./boardList";
-  import  { HoloHashMap, LazyHoloHashMap } from "@holochain-open-dev/utils";
 
   const { getStore } :any = getContext('store');
   const store:SlateStore = getStore();

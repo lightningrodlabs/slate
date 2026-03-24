@@ -1,6 +1,5 @@
-import { HoloHashMap, LazyHoloHashMap } from "@holochain-open-dev/utils";
 import { derived, get, writable, type Readable, type Writable } from "svelte/store";
-import { type AgentPubKey, type EntryHash, type EntryHashB64, encodeHashToBase64 } from "@holochain/client";
+import { type AgentPubKey, type EntryHash, type EntryHashB64, encodeHashToBase64, HoloHashMap, LazyHoloHashMap } from "@holochain/client";
 import {toPromise, type AsyncReadable, pipe, joinAsync, asyncDerived, sliceAndJoin, alwaysSubscribed, type AsyncStatus} from '@holochain-open-dev/stores'
 import { FileStorageClient } from "@holochain-open-dev/file-storage";
 import { SynStore, WorkspaceStore } from "@holochain-syn/core";

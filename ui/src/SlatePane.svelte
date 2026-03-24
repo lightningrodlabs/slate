@@ -22,6 +22,7 @@
   import ReactAdapter from "./ReactAdapter.svelte";
   import AboutDialog from "./AboutDialog.svelte";
   import type { WAL } from "@theweave/api";
+  import '@holochain-syn/core/dist/elements/session-participants.js'
 
   const { getStore } :any = getContext("store");
   let store: SlateStore = getStore();
@@ -356,13 +357,8 @@
       </span>
       {#if $participants}
         <div class="participants">
-          <div style="display:flex; flex-direction: row">
-            {#each Array.from($participants.entries()) as [agentPubKey, sessionData]}
-            <div class:idle={Date.now()-sessionData.lastSeen >30000}>
-              <Avatar agentPubKey={agentPubKey} showNickname={false} size={30} />
-            </div>
-            {/each}
-
+          <div style="display:flex; flex-direction: row; margin: 3px 0;">
+            <session-participants direction="row" showOffline={true} sessionstore={session} />
           </div>
         </div>
       {/if}
